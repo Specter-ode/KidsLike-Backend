@@ -1,0 +1,1871 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "2.0.0",
+    "title": "Kidslike API",
+    "description": "API documentation for'Kidslike Backend'. [Backend github repository]https://github.com/Specter-ode/KidsLike-Backend)",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "servers": [
+    { "url": "https://kidslike-backend" }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authorization endpoints"
+    },
+    {
+      "name": "User",
+      "description": "User endpoints"
+    },
+    {
+      "name": "Child",
+      "description": "Children endpoints"
+    },
+    {
+      "name": "Task",
+      "description": "Tasks endpoints"
+    },
+    {
+      "name": "Gift",
+      "description": "Gifts endpoints"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User registration",
+        "parameters": [],
+        "requestBody": {
+          "description": "Registration's object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)",
+            "content": {}
+          },
+          "409": {
+            "description": "Provided email already exists",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User authentication",
+        "parameters": [],
+        "requestBody": {
+          "description": "Authentication's object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)",
+            "content": {}
+          },
+          "403": {
+            "description": "Email doesn't exist / Password is wrong",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Logout",
+        "security": [{ "Bearer": [] }],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Successful operation",
+            "content": {}
+          },
+          "400": {
+            "description": "No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Get new pair of tokens (use Bearer {refreshToken} instead of accessToken)",
+        "security": [{ "Bearer": [] }],
+        "parameters": [],
+        "requestBody": {
+          "description": "Object with session's id",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokensRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokensResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid refresh token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Google authentication. WARNING: Works only for sign-in, after registered on front-end (if you're writing your back-end for a SPECIFIC front-end, then you can configure it right to work both for sign-up & sign-in)",
+        "responses": {
+          "200": {
+            "description": "Successful operation (redirect to front-end with accessToken, refreshToken and sid in query). Then use GET /user",
+            "content": {}
+          },
+          "403": {
+            "description": "Not registered or registered with postman",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/auth/facebook": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Facebook authentication. WARNING: Works only for sign-in, after registered on front-end (if you're writing your back-end for a SPECIFIC front-end, then you can configure it right to work both for sign-up & sign-in)",
+        "responses": {
+          "200": {
+            "description": "Successful operation (redirect to front-end with accessToken, refreshToken and sid in query). Then use GET /user",
+            "content": {}
+          },
+          "403": {
+            "description": "Not registered or registered with postman",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/child": {
+      "post": {
+        "tags": ["Child"],
+        "summary": "Add a child",
+        "security": [{ "Bearer": [] }],
+        "parameters": [],
+        "requestBody": {
+          "description": "Child's object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChildRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChildResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/task": {
+      "get": {
+        "tags": ["Task"],
+        "summary": "Get all children tasks for current user",
+        "security": [{ "Bearer": [] }],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTasksResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      },
+      "post": {
+        "tags": ["Task"],
+        "summary": "Add task for the child",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "childId",
+            "in": "path",
+            "description": "Id of the child you want to update ('id' field in child's object)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {
+          "description": "Task's object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body or id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Task"],
+        "summary": "Edit task",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "Task's id ('id' field in task's object)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {
+          "description": "Task's object. At least one field is required",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TaskResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body or id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Task not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Task"],
+        "summary": "Delete task",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "Task's id ('id' field in task's object)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request (invalid id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Task not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/task/confirm": {
+      "patch": {
+        "tags": ["Task"],
+        "summary": "Set task's status to confirmed",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "Task's id ('id' field in task's object)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TaskConfirmResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "403": {
+            "description": "Task is already confirmed",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Task not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/task/cancel": {
+      "patch": {
+        "tags": ["Task"],
+        "summary": "Set task's status to canceled",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "Task's id ('id' field in task's object)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TaskCancelResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "403": {
+            "description": "Task is already canceled",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Task not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/task/reset": {
+      "patch": {
+        "tags": ["Task"],
+        "summary": "Reset task's status",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "Task's id ('id' field in task's object)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TaskResetResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "403": {
+            "description": "Task is already reset",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Task not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/task/finished": {
+      "get": {
+        "tags": ["Task"],
+        "summary": "Get finished tasks from one child",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "childId",
+            "in": "path",
+            "description": "Child's id ('id' field in child's object)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFinishedTasksResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "No finished tasks found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/gift": {
+      "get": {
+        "tags": ["Gift"],
+        "summary": "Get all children gifts for current user",
+        "security": [{ "Bearer": [] }],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGiftsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      },
+      "post": {
+        "tags": ["Gift"],
+        "summary": "Add gift for the child",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "childId",
+            "in": "path",
+            "description": "Id of the child you want to update ('id' field in child's object)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {
+          "description": "Gift's object",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PostGiftRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GiftResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body or id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Invalid user / Invalid session",
+            "content": {}
+          },
+          "415": {
+            "description": "File is not an image",
+            "content": {}
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Gift"],
+        "summary": "Edit gift",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "giftId",
+            "in": "path",
+            "description": "Gift's id ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "requestBody": {
+          "description": "Gift's object. At least one field is required",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchGiftRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GiftResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body or id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Gift not found / Invalid user / Invalid session",
+            "content": {}
+          },
+          "415": {
+            "description": "File is not an image",
+            "content": {}
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Gift"],
+        "summary": "Delete gift",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "giftId",
+            "in": "path",
+            "description": "Gift's id ",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request (invalid id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Gift not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/gift/buy": {
+      "patch": {
+        "tags": ["Gift"],
+        "summary": "Buy gift for the child",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "giftId",
+            "in": "path",
+            "description": "Gift's id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchasedGift"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body or id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "403": {
+            "description": "This gift has already been purchased",
+            "content": {}
+          },
+          "404": {
+            "description": "Child not found / Invalid user / Invalid session",
+            "content": {}
+          },
+          "409": {
+            "description": "Not enough balance for gaining this gift",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/gift/reset": {
+      "patch": {
+        "tags": ["Gift"],
+        "summary": "Reset gift if it's purchased",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "giftId",
+            "in": "path",
+            "description": "Gift's id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GiftResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid id) / No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "403": {
+            "description": "This gift has already been reset",
+            "content": {}
+          },
+          "404": {
+            "description": "Gift not found / Child not found / Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get all your info",
+        "parameters": [],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          }
+        }
+      },
+      "delete": {
+        "tags": ["User"],
+        "summary": "Clear all your info",
+        "parameters": [],
+        "requestBody": {
+          "description": "Authentication's object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful operation",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad request (invalid request body)",
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegistrationRequest": {
+        "required": ["email", "password", "username"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email",
+            "minLength": 3,
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "qwerty123",
+            "minLength": 8,
+            "maxLength": 100
+          },
+          "username": {
+            "type": "string",
+            "description": "User's name",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Adam"
+          }
+        }
+      },
+      "RegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "username": {
+            "type": "string",
+            "description": "User's name",
+            "example": "Adam"
+          },
+          "id": {
+            "type": "string",
+            "description": "User's id",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        }
+      },
+      "LoginRequest": {
+        "required": ["email", "password"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email",
+            "minLength": 3,
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "minLength": 8,
+            "maxLength": 100,
+            "example": "qwerty123"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Session's access token (needed for all requests)",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI1ZmMyMDg1YmQwOTM2NTI4MTA3Y2UyNzQiLCJzaWQiOiI1ZmMyZDJmY2UxZDIwNTA2NzAyYmRkMjIiLCJpYXQiOjE2MDY2MDM1MTYsImV4cCI6MTYwNjYwNzExNn0.rJ_QjU4KvA76H96RHsvOBChK0Vjbd0NmqjMxdQVJIXA"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Session's refresh token (needed for /auth/refresh)",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI1ZmMyMDg1YmQwOTM2NTI4MTA3Y2UyNzQiLCJzaWQiOiI1ZmMyZDJmY2UxZDIwNTA2NzAyYmRkMjIiLCJpYXQiOjE2MDY2MDM1MTYsImV4cCI6MTYwNjYwNzExNn0.rJ_QjU4KvA76H96RHsvOBChK0Vjbd0NmqjMxdQVJIXB"
+          },
+          "sid": {
+            "type": "string",
+            "description": "Session's id (needed for /auth/refresh)",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "description": "User's email",
+                "format": "email"
+              },
+              "username": {
+                "type": "string",
+                "description": "User's name",
+                "example": "Adam"
+              },
+              "id": {
+                "type": "string",
+                "description": "User's id",
+                "example": "507f1f77bcf86cd799439012"
+              },
+              "children": {
+                "type": "array",
+                "description": "User's children",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "balance": {
+                      "type": "integer",
+                      "description": "Child's balance"
+                    },
+                    "tasks": {
+                      "type": "array",
+                      "description": "Child's tasks",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string",
+                            "description": "Task's id",
+                            "example": "507f1f77bcf86cd799439011"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Task's name",
+                            "example": "Name of the task"
+                          },
+                          "reward": {
+                            "type": "string",
+                            "description": "Task's reward",
+                            "example": 1
+                          },
+                          "isCompleted": {
+                            "type": "string",
+                            "description": "Task's status",
+                            "enum": ["unknown", "confirmed", "canceled"]
+                          },
+                          "childId": {
+                            "type": "string",
+                            "description": "Id of the child whose task it is",
+                            "example": "507f1f77bcf86cd799439011"
+                          },
+                          "daysToComplete": {
+                            "type": "integer",
+                            "description": "Amount of days to complete this task (optional)",
+                            "example": 1
+                          },
+                          "__v": {
+                            "type": "integer",
+                            "description": "MongoDB document service versionKey (ignore)"
+                          }
+                        }
+                      }
+                    },
+                    "gifts": {
+                      "type": "array",
+                      "description": "Child's gifts",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string",
+                            "description": "Gift's id",
+                            "example": "507f1f77bcf86cd799439011"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Gift's name",
+                            "example": "Name of the gift"
+                          },
+                          "price": {
+                            "type": "integer",
+                            "description": "Gift's price",
+                            "minimum": 1,
+                            "example": 1
+                          },
+                          "isPurchased": {
+                            "type": "boolean",
+                            "description": "Gift's status"
+                          },
+                          "imageUrl": {
+                            "type": "string",
+                            "description": "Gift's image url (created if 'file' field was provided while adding new gift)"
+                          },
+                          "childId": {
+                            "type": "string",
+                            "description": "Id of the child this gift was created for",
+                            "example": "507f1f77bcf86cd799439011"
+                          },
+                          "__v": {
+                            "type": "integer",
+                            "description": "MongoDB document service versionKey (ignore)"
+                          }
+                        }
+                      }
+                    },
+                    "_id": {
+                      "type": "string",
+                      "description": "Child's id",
+                      "example": "507f1f77bcf86cd799439011"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Child's name",
+                      "example": "Adam"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "description": "Child's gender",
+                      "enum": ["male", "female"]
+                    },
+                    "__v": {
+                      "type": "integer",
+                      "description": "MongoDB document service versionKey (ignore)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "RefreshTokensRequest": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "description": "Session's ('sid' field after authentication)",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        }
+      },
+      "RefreshTokensResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI1ZmMyMDg1YmQwOTM2NTI4MTA3Y2UyNzQiLCJzaWQiOiI1ZmMyZDJmY2UxZDIwNTA2NzAyYmRkMjIiLCJpYXQiOjE2MDY2MDM1MTYsImV4cCI6MTYwNjYwNzExNn0.rJ_QjU4KvA76H96RHsvOBChK0Vjbd0NmqjMxdQVJIXA"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI1ZmMyMDg1YmQwOTM2NTI4MTA3Y2UyNzQiLCJzaWQiOiI1ZmMyZDJmY2UxZDIwNTA2NzAyYmRkMjIiLCJpYXQiOjE2MDY2MDM1MTYsImV4cCI6MTYwNjYwNzExNn0.rJ_QjU4KvA76H96RHsvOBChK0Vjbd0NmqjMxdQVJIXB"
+          },
+          "newSid": {
+            "type": "string",
+            "description": "New session's id",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        }
+      },
+      "GetUserInfo": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "username": {
+            "type": "string",
+            "description": "User's name",
+            "example": "Adam"
+          },
+          "id": {
+            "type": "string",
+            "description": "User's id",
+            "example": "507f1f77bcf86cd799439012"
+          },
+
+          "children": {
+            "type": "array",
+            "description": "User's children",
+            "items": {
+              "type": "object",
+              "properties": {
+                "balance": {
+                  "type": "integer",
+                  "description": "Child's balance"
+                },
+                "tasks": {
+                  "type": "array",
+                  "description": "Child's tasks",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "description": "Task's id",
+                        "example": "507f1f77bcf86cd799439011"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Task's name",
+                        "example": "Name of the task"
+                      },
+                      "reward": {
+                        "type": "string",
+                        "description": "Task's reward",
+                        "example": 1
+                      },
+                      "isCompleted": {
+                        "type": "string",
+                        "description": "Task's status",
+                        "enum": ["unknown", "confirmed", "canceled"]
+                      },
+                      "childId": {
+                        "type": "string",
+                        "description": "Id of the child whose task it is",
+                        "example": "507f1f77bcf86cd799439011"
+                      },
+                      "daysToComplete": {
+                        "type": "integer",
+                        "description": "Amount of days to complete this task (optional)",
+                        "example": 1
+                      },
+                      "__v": {
+                        "type": "integer",
+                        "description": "MongoDB document service versionKey (ignore)"
+                      }
+                    }
+                  }
+                },
+                "gifts": {
+                  "type": "array",
+                  "description": "Child's gifts",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "description": "Gift's id",
+                        "example": "507f1f77bcf86cd799439011"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Gift's name",
+                        "example": "Name of the gift"
+                      },
+                      "price": {
+                        "type": "integer",
+                        "description": "Gift's price",
+                        "minimum": 1,
+                        "example": 1
+                      },
+                      "isPurchased": {
+                        "type": "boolean",
+                        "description": "Gift's status"
+                      },
+                      "imageUrl": {
+                        "type": "string",
+                        "description": "Gift's image url (created if 'file' field was provided while adding new gift)"
+                      },
+                      "childId": {
+                        "type": "string",
+                        "description": "Id of the child this gift was created for",
+                        "example": "507f1f77bcf86cd799439011"
+                      },
+                      "__v": {
+                        "type": "integer",
+                        "description": "MongoDB document service versionKey (ignore)"
+                      }
+                    }
+                  }
+                },
+                "_id": {
+                  "type": "string",
+                  "description": "Child's id",
+                  "example": "507f1f77bcf86cd799439011"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Child's name",
+                  "example": "Adam"
+                },
+                "gender": {
+                  "type": "string",
+                  "description": "Child's gender",
+                  "enum": ["male", "female"]
+                },
+                "__v": {
+                  "type": "integer",
+                  "description": "MongoDB document service versionKey (ignore)"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ChildRequest": {
+        "required": ["name", "gender"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Child's name",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Adam"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Child's gender",
+            "enum": ["male", "female"]
+          }
+        }
+      },
+      "ChildResponse": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "integer",
+            "description": "Child's balance"
+          },
+          "tasks": {
+            "type": "array",
+            "description": "Child's tasks",
+            "items": {}
+          },
+          "gifts": {
+            "type": "array",
+            "description": "Child's gifts",
+            "items": {}
+          },
+          "name": {
+            "type": "string",
+            "description": "Child's name",
+            "example": "Adam"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Child's gender",
+            "enum": ["male", "female"]
+          },
+          "id": {
+            "type": "string",
+            "description": "Child's id",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        }
+      },
+      "PostTaskRequest": {
+        "required": ["name", "reward"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Task's name",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Name of the task"
+          },
+          "reward": {
+            "type": "integer",
+            "description": "Task's reward",
+            "minimum": 1,
+            "maximum": 10000,
+            "example": 1
+          },
+          "daysToComplete": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "Days for a task to be completed (optional)",
+            "example": 1
+          }
+        }
+      },
+      "PatchTaskRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Task's name",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Name of the task"
+          },
+          "reward": {
+            "type": "integer",
+            "description": "Task's reward",
+            "minimum": 1,
+            "maximum": 10000,
+            "example": 1
+          },
+          "daysToComplete": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "Days for a task to be completed (optional)",
+            "example": 1
+          }
+        }
+      },
+      "TaskResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Task's name",
+            "example": "Name of the task"
+          },
+          "reward": {
+            "type": "string",
+            "description": "Task's reward",
+            "example": 1
+          },
+          "isCompleted": {
+            "type": "string",
+            "description": "Task's status",
+            "enum": ["unknown", "confirmed", "canceled"]
+          },
+          "daysToComplete": {
+            "type": "integer",
+            "description": "Amount of days to complete this task (optional)",
+            "example": 1
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Task's start date (if 'daysToComplete' field was provided)",
+            "example": "2020-12-31"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Task's end date (if 'daysToComplete' field was provided)",
+            "example": "2021-01-01"
+          },
+          "childId": {
+            "type": "string",
+            "description": "Id of the child whose task it is",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "id": {
+            "type": "string",
+            "description": "Task's id",
+            "example": "507f1f77bcf86cd799439012"
+          }
+        }
+      },
+      "TaskConfirmResponse": {
+        "type": "object",
+        "properties": {
+          "updatedTask": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Task's name",
+                "example": "Name of the task"
+              },
+              "reward": {
+                "type": "string",
+                "description": "Task's reward",
+                "example": 1
+              },
+              "isCompleted": {
+                "type": "string",
+                "description": "Task's status",
+                "enum": ["confirmed"]
+              },
+              "daysToComplete": {
+                "type": "integer",
+                "description": "Amount of days to complete this task (might not be here)",
+                "example": 1
+              },
+              "startDate": {
+                "type": "string",
+                "description": "Task's start date (might not be here)",
+                "example": "2020-12-31"
+              },
+              "endDate": {
+                "type": "string",
+                "description": "Task's end date (might not be here)",
+                "example": "2021-01-01"
+              },
+              "childId": {
+                "type": "string",
+                "description": "Id of the child whose task it is",
+                "example": "507f1f77bcf86cd799439011"
+              },
+              "id": {
+                "type": "string",
+                "description": "Task's id",
+                "example": "507f1f77bcf86cd799439012"
+              }
+            }
+          },
+          "updatedRewards": {
+            "type": "integer",
+            "description": "Child's new balance amount",
+            "minimum": 1,
+            "example": 1
+          }
+        }
+      },
+      "TaskCancelResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Task's name",
+            "example": "Name of the task"
+          },
+          "reward": {
+            "type": "string",
+            "description": "Task's reward",
+            "example": 1
+          },
+          "isCompleted": {
+            "type": "string",
+            "description": "Task's status",
+            "enum": ["canceled"]
+          },
+          "daysToComplete": {
+            "type": "integer",
+            "description": "Amount of days to complete this task (might not be here)",
+            "example": 1
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Task's start date (might not be here)",
+            "example": "2020-12-31"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Task's end date (might not be here)",
+            "example": "2021-01-01"
+          },
+          "childId": {
+            "type": "string",
+            "description": "Id of the child whose task it is",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "id": {
+            "type": "string",
+            "description": "Task's id",
+            "example": "507f1f77bcf86cd799439012"
+          }
+        }
+      },
+      "TaskResetResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Task's name",
+            "example": "Name of the task"
+          },
+          "reward": {
+            "type": "string",
+            "description": "Task's reward",
+            "example": 1
+          },
+          "isCompleted": {
+            "type": "string",
+            "description": "Task's status",
+            "enum": ["unknown"]
+          },
+          "daysToComplete": {
+            "type": "integer",
+            "description": "Amount of days to complete this task (might not be here)",
+            "example": 1
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Task's start date (might not be here)",
+            "example": "2020-12-31"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Task's end date (might not be here)",
+            "example": "2021-01-01"
+          },
+          "childId": {
+            "type": "string",
+            "description": "Id of the child whose task it is",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "id": {
+            "type": "string",
+            "description": "Task's id",
+            "example": "507f1f77bcf86cd799439012"
+          }
+        }
+      },
+      "GetTasksResponse": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Task's name",
+                "example": "Name of the task"
+              },
+              "reward": {
+                "type": "string",
+                "description": "Task's reward",
+                "example": 1
+              },
+              "isCompleted": {
+                "type": "string",
+                "description": "Task's status",
+                "enum": ["unknown", "confirmed", "canceled"]
+              },
+              "daysToComplete": {
+                "type": "integer",
+                "description": "Amount of days to complete this task (optional)",
+                "example": 1
+              },
+              "startDate": {
+                "type": "string",
+                "description": "Task's start date (if 'daysToComplete' field was provided)",
+                "example": "2020-12-31"
+              },
+              "endDate": {
+                "type": "string",
+                "description": "Task's end date (if 'daysToComplete' field was provided)",
+                "example": "2021-01-01"
+              },
+              "childId": {
+                "type": "string",
+                "description": "Id of the child whose task it is",
+                "example": "507f1f77bcf86cd799439011"
+              },
+              "id": {
+                "type": "string",
+                "description": "Task's id",
+                "example": "507f1f77bcf86cd799439012"
+              }
+            }
+          }
+        }
+      },
+      "GetFinishedTasksResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Task's name",
+              "example": "Name of the task"
+            },
+            "reward": {
+              "type": "string",
+              "description": "Task's reward",
+              "example": 1
+            },
+            "isCompleted": {
+              "type": "string",
+              "description": "Task's status",
+              "enum": ["unknown", "confirmed", "canceled"],
+              "example": "confirmed"
+            },
+            "daysToComplete": {
+              "type": "integer",
+              "description": "Amount of days to complete this task (optional)",
+              "example": 1
+            },
+            "startDate": {
+              "type": "string",
+              "description": "Task's start date (if 'daysToComplete' field was provided)",
+              "example": "2020-12-31"
+            },
+            "endDate": {
+              "type": "string",
+              "description": "Task's end date (if 'daysToComplete' field was provided)",
+              "example": "2021-01-01"
+            },
+            "childId": {
+              "type": "string",
+              "description": "Id of the child whose task it is",
+              "example": "507f1f77bcf86cd799439011"
+            },
+            "id": {
+              "type": "string",
+              "description": "Task's id",
+              "example": "507f1f77bcf86cd799439012"
+            }
+          }
+        }
+      },
+      "PostGiftRequest": {
+        "required": ["name", "price"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Gift's name",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Name of the gift"
+          },
+          "price": {
+            "type": "integer",
+            "description": "Gift's price",
+            "minimum": 1,
+            "maximum": 10000,
+            "example": 1
+          },
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "Gift's image"
+          }
+        }
+      },
+      "GiftResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Gift's name",
+            "example": "Name of the gift"
+          },
+          "price": {
+            "type": "integer",
+            "description": "Gift's price",
+            "minimum": 1,
+            "maximum": 10000,
+            "example": 1
+          },
+          "isPurchased": {
+            "type": "boolean",
+            "description": "Gift's status",
+            "example": false
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Gift's image url (created if 'file' field was provided while adding new gift)"
+          },
+          "childId": {
+            "type": "string",
+            "description": "Id of the child this gift was created for",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "id": {
+            "type": "string",
+            "description": "Gift's id",
+            "example": "507f1f77bcf86cd799439012"
+          }
+        }
+      },
+      "PatchGiftRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Gift's name",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Name of the gift"
+          },
+          "price": {
+            "type": "integer",
+            "description": "Gift's price",
+            "minimum": 1,
+            "maximum": 10000,
+            "example": 1
+          },
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "Gift's image"
+          }
+        }
+      },
+      "PurchasedGift": {
+        "type": "object",
+        "properties": {
+          "updatedRewards": {
+            "type": "integer",
+            "description": "Child's new balance amount",
+            "minimum": 1,
+            "example": 1
+          },
+          "purchasedGift": {
+            "type": "object",
+            "description": "Obtained gift",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Gift's name",
+                "example": "Name of the gift"
+              },
+              "price": {
+                "type": "integer",
+                "description": "Gift's price",
+                "minimum": 1,
+                "example": 1
+              },
+              "isPurchased": {
+                "type": "boolean",
+                "description": "Gift's status"
+              },
+              "imageUrl": {
+                "type": "string",
+                "description": "Gift's image url (created if 'file' field was provided while adding new gift)"
+              },
+              "childId": {
+                "type": "string",
+                "description": "Id of the child this gift was created for",
+                "example": "507f1f77bcf86cd799439011"
+              },
+              "id": {
+                "type": "string",
+                "description": "Gift's id",
+                "example": "507f1f77bcf86cd799439012"
+              }
+            }
+          }
+        }
+      },
+      "GetGiftsResponse": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Gift's name",
+                "example": "Name of the gift"
+              },
+              "price": {
+                "type": "integer",
+                "description": "Gift's price",
+                "minimum": 1,
+                "example": 1
+              },
+              "isPurchased": {
+                "type": "boolean",
+                "description": "Gift's status"
+              },
+              "imageUrl": {
+                "type": "string",
+                "description": "Gift's image url (created if 'file' field was provided while adding new gift)"
+              },
+              "childId": {
+                "type": "string",
+                "description": "Id of the child this gift was created for",
+                "example": "507f1f77bcf86cd799439011"
+              },
+              "id": {
+                "type": "string",
+                "description": "Gift's id",
+                "example": "507f1f77bcf86cd799439012"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
