@@ -10,17 +10,16 @@ import {
   deleteGift,
   buyGift,
   getGifts,
-  resetGift,
 } from "./gift.controller.js";
 import { multerMid } from "../../helpers/multer-config.js";
 
 const addGiftSchema = Joi.object({
-  name: Joi.string().min(3).max(20).required(),
+  title: Joi.string().min(3).max(40).required(),
   price: Joi.number().required().min(1).max(10000),
 });
 
 const editGiftSchema = Joi.object({
-  name: Joi.string().min(3).max(20),
+  title: Joi.string().min(3).max(40),
   price: Joi.number().min(1).max(10000),
 });
 
@@ -82,12 +81,6 @@ router.patch(
   tryCatchWrapper(authorize),
   validate(editOrDeleteGiftIdSchema, "params"),
   tryCatchWrapper(buyGift)
-);
-router.patch(
-  "/reset/:giftId",
-  tryCatchWrapper(authorize),
-  validate(editOrDeleteGiftIdSchema, "params"),
-  tryCatchWrapper(resetGift)
 );
 
 export default router;

@@ -68,7 +68,7 @@ class Server {
       if (err.response) {
         status = err.response.status;
       }
-      return res.status(status).send(err.message);
+      return res.status(status).json(err.message);
     });
   }
 }

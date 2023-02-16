@@ -12,15 +12,9 @@ import {
 import tryCatchWrapper from "../../helpers/try-catch-wrapper.js";
 
 const addTaskSchema = Joi.object({
-  name: Joi.string().min(2).max(100).required(),
+  title: Joi.string().min(2).max(40).required(),
   reward: Joi.number().required().min(1).max(10000),
 });
-
-// const updateTaskSchema = Joi.object({
-//   date: Joi.date(),
-//   isCompleted: Joi.bool(),
-//   isActive: Joi.bool(),
-// });
 
 const updateTaskActiveStatusSchema = Joi.object({
   days: Joi.array()

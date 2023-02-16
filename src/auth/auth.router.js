@@ -14,6 +14,7 @@ import {
   authorize,
 } from "./auth.controller.js";
 import validate from "../helpers/validate.js";
+import { checkWeek } from "../helpers/week.js";
 
 const signUpSchema = Joi.object({
   email: Joi.string().min(3).max(100).required(),

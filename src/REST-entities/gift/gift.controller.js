@@ -10,13 +10,21 @@ export const addGift = async (req, res) => {
     (childId) => childId.toString() === req.params.childId
   );
   if (!childToUpdateId) {
-    return res.status(404).send({ message: "Child not found" });
+    return res.status(404).json({ message: "Child not found" });
   }
-  const giftImage = req.file;
+
   if (req.fileValidationError) {
-    return res.status(415).send({ message: req.fileValidationError });
+    return res.status(415).json({ message: req.fileValidationError });
   }
-  const imageUrl = await uploadImage(giftImage);
+
+  let imageUrl;
+  if (!req.file) {
+    imageUrl =
+      "https://storage.googleapis.com/kidslikev2_bucket/default-task.jpg";
+  } else {
+    imageUrl = await uploadImage(req.file);
+  }
+
   const gift = await GiftModel.create({
     ...req.body,
     imageUrl,
@@ -26,8 +34,8 @@ export const addGift = async (req, res) => {
   await ChildModel.findByIdAndUpdate(childToUpdateId, {
     $push: { gifts: gift },
   });
-  return res.status(201).send({
-    name: gift.name,
+  return res.status(201).json({
+    title: gift.title,
     price: gift.price,
     isPurchased: gift.isPurchased,
     imageUrl: gift.imageUrl,
@@ -40,21 +48,23 @@ export const editGift = async (req, res) => {
   const parent = req.user;
   const giftToEdit = await GiftModel.findById(req.params.giftId);
   if (!giftToEdit) {
-    return res.status(404).send({ message: "Gift not found" });
+    return res.status(404).json({ message: "Gift not found" });
   }
   const childToUpdate = parent.children.find(
     (childId) => childId.toString() === giftToEdit.childId.toString()
   );
   if (!childToUpdate) {
-    return res.status(404).send({ message: "Child not found" });
+    return res.status(404).json({ message: "Child not found" });
   }
-  if (!req.file && !req.body.name && !req.body.price) {
-    return res.status(400).send({ message: "At least one field is required" });
+  if (!req.file && !req.body.title && !req.body.price) {
+    return res
+      .status(400)
+      .json({ message: "At least one field must be required" });
   }
   let imageUrl = giftToEdit.imageUrl;
   const giftImage = req.file;
   if (req.fileValidationError) {
-    return res.status(415).send({ message: req.fileValidationError });
+    return res.status(415).json({ message: req.fileValidationError });
   }
   if (giftImage) {
     imageUrl = await uploadImage(req.file);
@@ -63,8 +73,8 @@ export const editGift = async (req, res) => {
   await GiftModel.findByIdAndUpdate(req.params.giftId, newGift, {
     overwrite: true,
   });
-  return res.status(200).send({
-    name: newGift.name,
+  return res.status(200).json({
+    title: newGift.title,
     price: newGift.price,
     isPurchased: newGift.isPurchased,
     imageUrl: newGift.imageUrl,
@@ -77,13 +87,13 @@ export const deleteGift = async (req, res) => {
   const parent = req.user;
   const giftToDelete = await GiftModel.findById(req.params.giftId);
   if (!giftToDelete) {
-    return res.status(404).send({ message: "Gift not found" });
+    return res.status(404).json({ message: "Gift not found" });
   }
   const childToUpdate = parent.children.find(
     (childId) => childId.toString() === giftToDelete.childId.toString()
   );
   if (!childToUpdate) {
-    return res.status(404).send({ message: "Child not found" });
+    return res.status(404).json({ message: "Child not found" });
   }
   const deletedGift = await GiftModel.findByIdAndDelete(req.params.giftId);
   await ChildModel.findByIdAndUpdate(deletedGift.childId, {
@@ -96,34 +106,34 @@ export const buyGift = async (req, res) => {
   const parent = req.user;
   const giftToBuy = await GiftModel.findById(req.params.giftId);
   if (!giftToBuy) {
-    return res.status(404).send({ message: "Gift not found" });
+    return res.status(404).json({ message: "Gift not found" });
   }
   const childToUpdateId = parent.children.find(
     (childId) => childId.toString() === giftToBuy.childId.toString()
   );
   if (!childToUpdateId) {
-    return res.status(404).send({ message: "Child not found" });
+    return res.status(404).json({ message: "Child not found" });
   }
   const childToUpdate = await ChildModel.findById(childToUpdateId);
   if (giftToBuy.isPurchased) {
     return res
       .status(403)
-      .send({ message: "This gift has already been purchased" });
+      .json({ message: "This gift has already been purchased" });
   }
   if (childToUpdate.balance >= giftToBuy.price) {
-    const updatedRewards = childToUpdate.balance - giftToBuy.price;
+    const updatedBalance = childToUpdate.balance - giftToBuy.price;
     const purchasedGift = await GiftModel.findByIdAndUpdate(
       giftToBuy._id,
-      { $set: { isPurchased: true } },
+      { isPurchased: true },
       { new: true }
     );
     await ChildModel.findByIdAndUpdate(childToUpdateId, {
-      $set: { balance: updatedRewards },
+      balance: updatedBalance,
     });
-    return res.status(200).send({
-      updatedRewards,
+    return res.status(200).json({
+      updatedBalance,
       purchasedGift: {
-        name: purchasedGift.name,
+        title: purchasedGift.title,
         price: purchasedGift.price,
         isPurchased: purchasedGift.isPurchased,
         imageUrl: purchasedGift.imageUrl,
@@ -134,7 +144,7 @@ export const buyGift = async (req, res) => {
   }
   return res
     .status(409)
-    .send({ message: "Not enough balance for gaining this gift" });
+    .json({ message: "Not enough balance for gaining this gift" });
 };
 
 export const getGifts = async (req, res, next) => {
@@ -152,7 +162,7 @@ export const getGifts = async (req, res, next) => {
       const dataToEdit = data.children.map((child) => child.gifts);
       const dataToSend = dataToEdit.map((childArray) => {
         return childArray.map((childGift) => ({
-          name: childGift.name,
+          title: childGift.title,
           price: childGift.price,
           isPurchased: childGift.isPurchased,
           imageUrl: childGift.imageUrl,
@@ -160,35 +170,6 @@ export const getGifts = async (req, res, next) => {
           id: childGift._id,
         }));
       });
-      return res.status(200).send(dataToSend);
+      return res.status(200).json(dataToSend);
     });
-};
-
-export const resetGift = async (req, res) => {
-  const parent = req.user;
-  const giftToReset = await GiftModel.findById(req.params.giftId);
-  if (!giftToReset) {
-    return res.status(404).send({ message: "Gift not found" });
-  }
-  const childToUpdateId = parent.children.find(
-    (childId) => childId.toString() === giftToReset.childId.toString()
-  );
-  if (!childToUpdateId) {
-    return res.status(404).send({ message: "Child not found" });
-  }
-  if (!giftToReset.isPurchased) {
-    return res
-      .status(403)
-      .send({ message: "This gift has been already reset" });
-  }
-  giftToReset.isPurchased = false;
-  // await giftToReset.save();
-  res.status(200).send({
-    name: giftToReset.name,
-    price: giftToReset.price,
-    isPurchased: giftToReset.isPurchased,
-    imageUrl: giftToReset.imageUrl,
-    childId: giftToReset.childId,
-    id: giftToReset._id,
-  });
 };

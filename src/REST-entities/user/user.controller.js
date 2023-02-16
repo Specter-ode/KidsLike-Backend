@@ -3,7 +3,7 @@ import UserModel from "./user.model.js";
 import ChildModel from "../child/child.model.js";
 import TaskModel from "../task/task.model.js";
 import GiftModel from "../gift/gift.model.js";
-import { weekPeriod } from "../../helpers/new-week.js";
+import { weekPeriod } from "../../helpers/week.js";
 
 export const getAllInfo = async (req, res, next) => {
   const email = req.user.email;
@@ -21,7 +21,7 @@ export const getAllInfo = async (req, res, next) => {
       if (err) {
         next(err);
       }
-      return res.status(200).send({
+      return res.status(200).json({
         email: data.email,
         username: data.username,
         id: data._id,
@@ -38,11 +38,11 @@ export const clearAllInfo = async (req, res, next) => {
   if (!user) {
     return res
       .status(403)
-      .send({ message: `User with ${email} email doesn't exist` });
+      .json({ message: `User with ${email} email doesn't exist` });
   }
   const isPasswordCorrect = await bcrypt.compare(password, user.passwordHash);
   if (!isPasswordCorrect) {
-    return res.status(403).send({ message: "Password is wrong" });
+    return res.status(403).json({ message: "Password is wrong" });
   }
   await UserModel.findOne({ email })
     .populate({
