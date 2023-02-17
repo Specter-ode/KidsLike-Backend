@@ -1,4 +1,4 @@
-import { getDefaultTasks } from "../../helpers/getDefaultTasks.js";
+import { getDefaultTasksAndGifts } from "../../helpers/getDefaultTasksAndGifts.js";
 import GiftModel from "../gift/gift.model.js";
 import TaskModel from "../task/task.model.js";
 import UserModel from "../user/user.model.js";
@@ -34,10 +34,10 @@ export const addChild = async (req, res) => {
     $push: { children: newChild },
   });
 
-  const tasks = await getDefaultTasks("ru", newChild._id);
+  const { tasks, gifts } = await getDefaultTasksAndGifts("ru", newChild._id);
   return ChildModel.findByIdAndUpdate(
     { _id: newChild._id },
-    { tasks },
+    { tasks, gifts },
     { new: true }
   )
     .populate([

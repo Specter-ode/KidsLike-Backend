@@ -1,14 +1,20 @@
 import { DateTime } from "luxon";
 import { ruTasks, uaTasks } from "../REST-entities/task/default-tasks.js";
-import taskModel from "../REST-entities/task/task.model.js";
+import { ruGifts, uaGifts } from "../REST-entities/gift/default-gifts.js";
+import TaskModel from "../REST-entities/task/task.model.js";
+import GiftModel from "../REST-entities/gift/gift.model.js";
 
-export const getDefaultTasks = async (lang, childId) => {
+export const getDefaultTasksAndGifts = async (lang, childId) => {
   let defaultTasks = [];
+  let defaultGifts = [];
+
   if (lang === "ru") {
     defaultTasks = [...ruTasks];
+    defaultGifts = [...ruGifts];
   }
   if (lang === "ua") {
     defaultTasks = [...uaTasks];
+    defaultGifts = [...uaGifts];
   }
 
   const startOfTheWeek = DateTime.local().startOf("week");
@@ -23,9 +29,9 @@ export const getDefaultTasks = async (lang, childId) => {
   }
 
   const tasks = [];
-
+  const gifts = [];
   for (let i = 0; i < defaultTasks.length; i++) {
-    const task = await taskModel.create({
+    const task = await TaskModel.create({
       title: defaultTasks[i].title,
       reward: defaultTasks[i].reward,
       imageUrl: defaultTasks[i].imageUrl,
@@ -34,5 +40,15 @@ export const getDefaultTasks = async (lang, childId) => {
     });
     tasks.push(task._id);
   }
-  return tasks;
+  for (let i = 0; i < defaultGifts.length; i++) {
+    const gift = await GiftModel.create({
+      title: defaultGifts[i].title,
+      price: defaultGifts[i].reward,
+      imageUrl: defaultGifts[i].imageUrl,
+      childId,
+    });
+    gifts.push(gift._id);
+  }
+
+  return { tasks, gifts };
 };

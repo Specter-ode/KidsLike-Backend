@@ -107,13 +107,13 @@ export const deleteTask = async (req, res) => {
   }
 
   const deletedTask = await TaskModel.findByIdAndDelete(req.params.taskId);
+  if (deletedTask.imageId) {
+    await cloudinary.uploader.destroy(deletedTask.imageId);
+  }
   await ChildModel.findByIdAndUpdate(deletedTask.childId, {
     $pull: { tasks: mongoose.Types.ObjectId(deletedTask._id) },
   });
 
-  if (deletedTask.imageId) {
-    await cloudinary.uploader.destroy(deletedTask.imageId);
-  }
   return res.status(204).end();
 };
 

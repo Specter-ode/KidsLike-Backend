@@ -96,6 +96,9 @@ export const deleteGift = async (req, res) => {
     return res.status(404).json({ message: "Child not found" });
   }
   const deletedGift = await GiftModel.findByIdAndDelete(req.params.giftId);
+  if (deletedGift.imageId) {
+    await cloudinary.uploader.destroy(deletedGift.imageId);
+  }
   await ChildModel.findByIdAndUpdate(deletedGift.childId, {
     $pull: { gifts: mongoose.Types.ObjectId(deletedGift._id) },
   });

@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import UserModel from "../REST-entities/user/user.model.js";
 import TaskModel from "../REST-entities/task/task.model.js";
+import GiftModel from "../REST-entities/gift/gift.model.js";
 
 export const weekPeriod = () => {
   const startOfTheWeek = DateTime.local().startOf("week");
@@ -21,13 +22,14 @@ export const weekPeriod = () => {
   };
 };
 
-export const checkWeek = async () => {
+export const checkWeek = async (_id) => {
   const startOfTheWeek = DateTime.local().startOf("week");
   console.log(
     'startOfTheWeek.toFormat("yyyy-MM-dd"): ',
     startOfTheWeek.toFormat("yyyy-MM-dd")
   );
   const isCorrectWeek = await UserModel.findOne({
+    _id,
     startWeekDate: startOfTheWeek.toFormat("yyyy-MM-dd"),
   });
   console.log("isCorrectWeek: ", isCorrectWeek);
@@ -50,5 +52,6 @@ export const checkWeek = async () => {
       }
     );
     await TaskModel.updateMany({}, { days });
+    await GiftModel.updateMany({}, { isPurchased: false });
   }
 };

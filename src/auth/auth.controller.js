@@ -58,7 +58,7 @@ export const login = async (req, res, next) => {
   }
 
   const { accessToken, refreshToken, sid } = await createSidAndTokens(user._id);
-  await checkWeek();
+  await checkWeek(user._id);
   await UserModel.findByIdAndUpdate(user._id, {
     accessToken,
     refreshToken,
@@ -139,7 +139,7 @@ export const facebookAuth = async (req, res) => {
   const { accessToken, refreshToken, sid } = await createSidAndTokens(
     req.user._id
   );
-  await checkWeek();
+
   await UserModel.findByIdAndUpdate(req.user._id, {
     accessToken,
     refreshToken,
@@ -152,7 +152,8 @@ export const facebookAuth = async (req, res) => {
 
 export const googleAuth = async (req, res) => {
   const { accessToken, refreshToken, sid } = await createTokens(req.user._id);
-  await checkWeek();
+  await checkWeek(req.user._id);
+
   await UserModel.findByIdAndUpdate(req.user._id, {
     accessToken,
     refreshToken,

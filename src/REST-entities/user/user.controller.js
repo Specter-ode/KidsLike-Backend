@@ -7,6 +7,8 @@ import { weekPeriod } from "../../helpers/week.js";
 
 export const getAllInfo = async (req, res, next) => {
   const email = req.user.email;
+  await checkWeek(req.user._id);
+
   const { startWeekDate, endWeekDate } = weekPeriod();
   return UserModel.findOne({ email })
     .populate({
