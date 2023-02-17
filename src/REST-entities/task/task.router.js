@@ -1,15 +1,16 @@
 import { Router } from "express";
 import Joi from "joi";
 import mongoose from "mongoose";
-import validate from "../../helpers/validate.js";
-import { authorize } from "../../auth/auth.controller.js";
+import validate from "../../middlewares/validate.js";
+import { authenticate } from "../../middlewares/authenticate.js";
 import {
   addTask,
   deleteTask,
   updateTaskActiveStatus,
   updateTaskCompletedStatus,
 } from "./task.controller.js";
-import tryCatchWrapper from "../../helpers/try-catch-wrapper.js";
+import tryCatchWrapper from "../../helpers/tryCatchWrapper.js";
+import { upload } from "../../middlewares/multer.js";
 
 const addTaskSchema = Joi.object({
   title: Joi.string().min(2).max(40).required(),
@@ -61,7 +62,8 @@ const router = Router();
 
 router.post(
   "/:childId",
-  tryCatchWrapper(authorize),
+  authenticate,
+  upload.single("avatar"),
   validate(addOrGetTaskIdSchema, "params"),
   validate(addTaskSchema),
   tryCatchWrapper(addTask)
@@ -69,7 +71,7 @@ router.post(
 router
   .route("/:taskId/active")
   .patch(
-    tryCatchWrapper(authorize),
+    authenticate,
     validate(editOrDeleteTaskIdSchema, "params"),
     validate(updateTaskActiveStatusSchema),
     tryCatchWrapper(updateTaskActiveStatus)
@@ -77,14 +79,14 @@ router
 
 router.patch(
   "/:taskId/completed",
-  tryCatchWrapper(authorize),
+  authenticate,
   validate(editOrDeleteTaskIdSchema, "params"),
   tryCatchWrapper(updateTaskCompletedStatus)
 );
 router
   .route("/:taskId/")
   .delete(
-    tryCatchWrapper(authorize),
+    authenticate,
     validate(editOrDeleteTaskIdSchema, "params"),
     tryCatchWrapper(deleteTask)
   );

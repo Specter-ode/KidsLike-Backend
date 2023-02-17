@@ -1,8 +1,8 @@
 import { Router } from "express";
 import Joi from "joi";
-import validate from "../../helpers/validate.js";
-import { authorize } from "../../auth/auth.controller.js";
-import tryCatchWrapper from "../../helpers/try-catch-wrapper.js";
+import validate from "../../middlewares/validate.js";
+import { authenticate } from "../../middlewares/authenticate.js";
+import tryCatchWrapper from "../../helpers/tryCatchWrapper.js";
 import { getAllInfo, clearAllInfo } from "./user.controller.js";
 
 const clearAllInfoSchema = Joi.object({
@@ -14,7 +14,7 @@ const router = Router();
 
 router
   .route("/")
-  .get(tryCatchWrapper(authorize), tryCatchWrapper(getAllInfo))
+  .get(authenticate, tryCatchWrapper(getAllInfo))
   .delete(validate(clearAllInfoSchema), tryCatchWrapper(clearAllInfo));
 
 export default router;

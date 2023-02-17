@@ -2,9 +2,10 @@ import cors from "cors";
 import path from "path";
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
+
 import morgan from "morgan";
 // import swaggerUi from "swagger-ui-express";
+import dotenv from "dotenv";
 
 dotenv.config();
 import authRouter from "./auth/auth.router.js";

@@ -1,20 +1,18 @@
 import { Router } from "express";
 import Joi from "joi";
 import mongoose from "mongoose";
-import tryCatchWrapper from "../helpers/try-catch-wrapper.js";
+import tryCatchWrapper from "../helpers/tryCatchWrapper.js";
 import {
   register,
   login,
-  // googleAuth,
-  // googleRedirect,
-  // facebookAuth,
-  // facebookRedirect,
+  googleAuth,
+  facebookAuth,
   refreshTokens,
   logout,
-  authorize,
 } from "./auth.controller.js";
-import validate from "../helpers/validate.js";
-import { checkWeek } from "../helpers/week.js";
+import authSocial from "../middlewares/authSocial.js";
+import validate from "../middlewares/validate.js";
+import { authenticate } from "../middlewares/authenticate.js";
 
 const signUpSchema = Joi.object({
   email: Joi.string().min(3).max(100).required(),
@@ -45,15 +43,32 @@ const router = Router();
 
 router.post("/register", validate(signUpSchema), tryCatchWrapper(register));
 router.post("/login", validate(signInSchema), tryCatchWrapper(login));
-router.post("/logout", tryCatchWrapper(authorize), tryCatchWrapper(logout));
+router.post("/logout", authenticate, tryCatchWrapper(logout));
 router.post(
   "/refresh",
   validate(refreshTokensSchema),
   tryCatchWrapper(refreshTokens)
 );
-// router.get("/google", tryCatchWrapper(googleAuth));
-// router.get("/google-redirect", tryCatchWrapper(googleRedirect));
-// router.get("/facebook", tryCatchWrapper(facebookAuth));
-// router.get("/facebook-redirect", tryCatchWrapper(facebookRedirect));
+
+router.get(
+  "/google",
+  authSocial.authenticate("google", { scope: ["email", "profile"] })
+);
+
+router.get(
+  "/google/callback",
+  authSocial.authenticate("google", { session: false }),
+  tryCatchWrapper(googleAuth)
+);
+
+router.get(
+  "/facebook",
+  authSocial.authenticate("facebook", { scope: ["email", "public_profile"] })
+);
+router.get(
+  "/facebook/callback",
+  authSocial.authenticate("facebook", { session: false }),
+  tryCatchWrapper(facebookAuth)
+);
 
 export default router;

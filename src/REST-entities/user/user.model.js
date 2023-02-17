@@ -38,6 +38,6 @@ const userSchema = new Schema(
   { versionKey: false }
 );
 
-// userSchema.post("save", handleSaveErrors);
+userSchema.post("save", handleSaveErrors);
 
 export default mongoose.model("User", userSchema);

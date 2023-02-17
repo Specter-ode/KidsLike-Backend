@@ -27,12 +27,12 @@ export const checkWeek = async () => {
     'startOfTheWeek.toFormat("yyyy-MM-dd"): ',
     startOfTheWeek.toFormat("yyyy-MM-dd")
   );
-  const isNewWeek = await UserModel.findOne({
+  const isCorrectWeek = await UserModel.findOne({
     startWeekDate: startOfTheWeek.toFormat("yyyy-MM-dd"),
   });
-  console.log("isNewWeek: ", isNewWeek);
+  console.log("isCorrectWeek: ", isCorrectWeek);
 
-  if (!isNewWeek) {
+  if (!isCorrectWeek) {
     const days = [];
     for (let i = 0; i < 7; i++) {
       const day = {

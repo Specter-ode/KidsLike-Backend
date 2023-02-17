@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import GiftModel from "./gift.model.js";
-import { uploadImage } from "../../helpers/multer-config.js";
 import ChildModel from "../child/child.model.js";
 import UserModel from "../user/user.model.js";
+import cloudinary from "../../helpers/cloudinary.js";
 
 export const addGift = async (req, res) => {
   const parent = req.user;
@@ -17,17 +17,12 @@ export const addGift = async (req, res) => {
     return res.status(415).json({ message: req.fileValidationError });
   }
 
-  let imageUrl;
-  if (!req.file) {
-    imageUrl =
-      "https://storage.googleapis.com/kidslikev2_bucket/default-task.jpg";
-  } else {
-    imageUrl = await uploadImage(req.file);
-  }
+  const image = await cloudinary.uploader.upload(req.file.path);
 
   const gift = await GiftModel.create({
     ...req.body,
-    imageUrl,
+    imageUrl: image.secure_url,
+    imageId: image.public_id,
     isPurchased: false,
     childId: childToUpdateId,
   });
@@ -37,7 +32,6 @@ export const addGift = async (req, res) => {
   return res.status(201).json({
     title: gift.title,
     price: gift.price,
-    isPurchased: gift.isPurchased,
     imageUrl: gift.imageUrl,
     childId: gift.childId,
     id: gift._id,
@@ -61,15 +55,21 @@ export const editGift = async (req, res) => {
       .status(400)
       .json({ message: "At least one field must be required" });
   }
-  let imageUrl = giftToEdit.imageUrl;
-  const giftImage = req.file;
   if (req.fileValidationError) {
     return res.status(415).json({ message: req.fileValidationError });
   }
-  if (giftImage) {
-    imageUrl = await uploadImage(req.file);
+
+  if (giftToEdit.imageId) {
+    await cloudinary.uploader.destroy(giftToEdit.imageId);
   }
-  const newGift = { ...giftToEdit.toObject(), ...req.body, imageUrl };
+
+  const image = await cloudinary.uploader.upload(req.file.path);
+  const newGift = {
+    ...giftToEdit.toObject(),
+    ...req.body,
+    imageUrl: image.secure_url,
+    imageId: image.public_id,
+  };
   await GiftModel.findByIdAndUpdate(req.params.giftId, newGift, {
     overwrite: true,
   });

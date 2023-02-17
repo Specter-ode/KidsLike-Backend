@@ -1,8 +1,5 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import * as queryString from "query-string";
-import axios from "axios";
-import { URL } from "url";
 
 import UserModel from "../REST-entities/user/user.model.js";
 import SessionModel from "../REST-entities/session/session.model.js";
@@ -10,10 +7,12 @@ import ChildModel from "../REST-entities/child/child.model.js";
 import TaskModel from "../REST-entities/task/task.model.js";
 import GiftModel from "../REST-entities/gift/gift.model.js";
 import { checkWeek, weekPeriod } from "../helpers/week.js";
+import { createSidAndTokens } from "../helpers/createSidAndTokens.js";
 
 export const register = async (req, res) => {
   const { email, password, username } = req.body;
-  console.log("req.body: ", req.body);
+  console.log("req.headers: ", req.headers);
+  console.log("req.headers.origin: ", req.headers.origin);
 
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) {
@@ -57,24 +56,8 @@ export const login = async (req, res, next) => {
   if (!isPasswordCorrect) {
     return res.status(403).json({ message: "Password is wrong" });
   }
-  const newSession = await SessionModel.create({
-    uid: user._id,
-  });
-  const accessToken = jwt.sign(
-    { uid: user._id, sid: newSession._id },
-    process.env.ACCESS_TOKEN_SECRET_KEY,
-    {
-      expiresIn: process.env.JWT_ACCESS_EXPIRE_TIME,
-    }
-  );
-  const refreshToken = jwt.sign(
-    { uid: user._id, sid: newSession._id },
-    process.env.REFRESH_TOKEN_SECRET_KEY,
-    {
-      expiresIn: process.env.JWT_REFRESH_EXPIRE_TIME,
-    }
-  );
 
+  const { accessToken, refreshToken, sid } = await createSidAndTokens(user._id);
   await checkWeek();
   await UserModel.findByIdAndUpdate(user._id, {
     accessToken,
@@ -91,7 +74,7 @@ export const login = async (req, res, next) => {
   return res.json({
     accessToken,
     refreshToken,
-    sid: newSession._id,
+    sid,
     email: user.email,
     username: user.username,
     id: user._id,
@@ -99,30 +82,6 @@ export const login = async (req, res, next) => {
     endWeekDate: user.endWeekDate,
     children: user.children,
   });
-};
-
-export const authorize = async (req, res, next) => {
-  const authorizationHeader = req.get("Authorization");
-  if (authorizationHeader) {
-    const accessToken = authorizationHeader.replace("Bearer ", "");
-    let payload;
-    try {
-      payload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET_KEY);
-    } catch (err) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    const user = await UserModel.findById(payload.uid);
-    const session = await SessionModel.findById(payload.sid);
-    if (!user) {
-      return res.status(404).json({ message: "Invalid user" });
-    }
-    if (!session) {
-      return res.status(404).json({ message: "Invalid session" });
-    }
-    req.user = user;
-    req.session = session;
-    next();
-  } else return res.status(400).json({ message: "No token provided" });
 };
 
 export const refreshTokens = async (req, res) => {
@@ -152,165 +111,53 @@ export const refreshTokens = async (req, res) => {
       return res.status(404).json({ message: "Invalid session" });
     }
     await SessionModel.findByIdAndDelete(payload.sid);
-    const newSession = await SessionModel.create({
-      uid: user._id,
+
+    const { accessToken, refreshToken, sid } = await createSidAndTokens(
+      user._id
+    );
+
+    return res.status(200).json({
+      newAccessToken: accessToken,
+      newRefreshToken: refreshToken,
+      newSid: sid,
     });
-    const newAccessToken = jwt.sign(
-      { uid: user._id, sid: newSession._id },
-      process.env.ACCESS_TOKEN_SECRET_KEY,
-      {
-        expiresIn: process.env.JWT_ACCESS_EXPIRE_TIME,
-      }
-    );
-    const newRefreshToken = jwt.sign(
-      { uid: user._id, sid: newSession._id },
-      process.env.REFRESH_TOKEN_SECRET_KEY,
-      { expiresIn: process.env.JWT_REFRESH_EXPIRE_TIME }
-    );
-    return res
-      .status(200)
-      .json({ newAccessToken, newRefreshToken, newSid: newSession._id });
   }
   return res.status(400).json({ message: "No token provided" });
 };
 
 export const logout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { accessToken: "", refreshToken: "" });
   const currentSession = req.session;
   await SessionModel.deleteOne({ _id: currentSession._id });
   return res.status(204).end();
 };
 
-// export const googleAuth = async (req, res) => {
-//   const stringifiedParams = queryString.stringify({
-//     client_id: process.env.GOOGLE_CLIENT_ID,
-//     redirect_uri: `${process.env.BASE_URL}/auth/google-redirect`,
-//     scope: [
-//       "https://www.googleapis.com/auth/userinfo.email",
-//       "https://www.googleapis.com/auth/userinfo.profile",
-//     ].join(" "),
-//     response_type: "code",
-//     access_type: "offline",
-//     prompt: "consent",
-//   });
-//   return res.redirect(
-//     `https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`
-//   );
-// };
+const { SOCIAL_REDIRECT_URL } = process.env;
 
-// export const googleRedirect = async (req, res) => {
-//   const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
-//   const urlObj = new URL(fullUrl);
-//   const urlParams = queryString.parse(urlObj.search);
-//   const code = urlParams.code;
-//   const tokenData = await axios({
-//     url: `https://oauth2.googleapis.com/token`,
-//     method: "post",
-//     data: {
-//       client_id: process.env.GOOGLE_CLIENT_ID,
-//       client_secret: process.env.GOOGLE_CLIENT_SECRET,
-//       redirect_uri: `${process.env.BASE_URL}/auth/google-redirect`,
-//       grant_type: "authorization_code",
-//       code,
-//     },
-//   });
-//   const userData = await axios({
-//     url: "https://www.googleapis.com/oauth2/v2/userinfo",
-//     method: "get",
-//     headers: {
-//       Authorization: `Bearer ${tokenData.data.access_token}`,
-//     },
-//   });
-//   let existingParent = await UserModel.findOne({ email: userData.data.email });
-//   if (!existingParent || !existingParent.originUrl) {
-//     return res.status(403).json({
-//       message:
-//         "You should register from front-end first (not postman). Google/Facebook are only for sign-in",
-//     });
-//   }
-//   const newSession = await SessionModel.create({
-//     uid: existingParent._id,
-//   });
-//   const accessToken = jwt.sign(
-//     { uid: existingParent._id, sid: newSession._id },
-//     process.env.ACCESS_TOKEN_SECRET_KEY as string,
-//     {
-//       expiresIn: process.env.JWT_ACCESS_EXPIRE_TIME,
-//     }
-//   );
-//   const refreshToken = jwt.sign(
-//     { uid: existingParent._id, sid: newSession._id },
-//     process.env.REFRESH_TOKEN_SECRET_KEY as string,
-//     {
-//       expiresIn: process.env.JWT_REFRESH_EXPIRE_TIME,
-//     }
-//   );
-//   return res.redirect(
-//     `${existingParent.originUrl}?accessToken=${accessToken}&refreshToken=${refreshToken}&sid=${newSession._id}`
-//   );
-// };
+export const facebookAuth = async (req, res) => {
+  const { accessToken, refreshToken, sid } = await createSidAndTokens(
+    req.user._id
+  );
+  await checkWeek();
+  await UserModel.findByIdAndUpdate(req.user._id, {
+    accessToken,
+    refreshToken,
+  });
 
-// export const facebookAuth = async (req, res) => {
-//   const stringifiedParams = queryString.stringify({
-//     client_id: process.env.FACEBOOK_APP_ID,
-//     redirect_uri: `${process.env.BASE_URL}/auth/facebook-redirect/`,
-//     scope: "email",
-//     response_type: "code",
-//     auth_type: "rerequest",
-//     display: "popup",
-//   });
-//   return res.redirect(
-//     `https://www.facebook.com/v4.0/dialog/oauth?${stringifiedParams}`
-//   );
-// };
+  res.redirect(
+    `${SOCIAL_REDIRECT_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}&sid=${sid}`
+  );
+};
 
-// export const facebookRedirect = async (req, res) => {
-//   const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
-//   const urlObj = new URL(fullUrl);
-//   const urlParams = queryString.parse(urlObj.search);
-//   const code = urlParams.code;
-//   const tokenData = await axios({
-//     url: "https://graph.facebook.com/v4.0/oauth/access_token",
-//     method: "get",
-//     params: {
-//       client_id: process.env.FACEBOOK_APP_ID,
-//       client_secret: process.env.FACEBOOK_APP_SECRET,
-//       redirect_uri: `${process.env.BASE_URL}/auth/facebook-redirect/`,
-//       code,
-//     },
-//   });
-//   const userData = await axios({
-//     url: "https://graph.facebook.com/me",
-//     method: "get",
-//     params: {
-//       fields: ["email", "first_name"].join(","),
-//       access_token: tokenData.data.access_token,
-//     },
-//   });
-//   let existingParent = await UserModel.findOne({ email: userData.data.email });
-//   if (!existingParent || !existingParent.originUrl) {
-//     return res.status(403).json({
-//       message:
-//         "You should register from front-end first (not postman). Google/Facebook are only for sign-in",
-//     });
-//   }
-//   const newSession = await SessionModel.create({
-//     uid: existingParent._id,
-//   });
-//   const accessToken = jwt.sign(
-//     { uid: existingParent._id, sid: newSession._id },
-//     process.env.ACCESS_TOKEN_SECRET_KEY as string,
-//     {
-//       expiresIn: process.env.JWT_ACCESS_EXPIRE_TIME,
-//     }
-//   );
-//   const refreshToken = jwt.sign(
-//     { uid: existingParent._id, sid: newSession._id },
-//     process.env.REFRESH_TOKEN_SECRET_KEY as string,
-//     {
-//       expiresIn: process.env.JWT_REFRESH_EXPIRE_TIME,
-//     }
-//   );
-//   return res.redirect(
-//     `${existingParent.originUrl}?accessToken=${accessToken}&refreshToken=${refreshToken}&sid=${newSession._id}`
-//   );
-// };
+export const googleAuth = async (req, res) => {
+  const { accessToken, refreshToken, sid } = await createTokens(req.user._id);
+  await checkWeek();
+  await UserModel.findByIdAndUpdate(req.user._id, {
+    accessToken,
+    refreshToken,
+  });
+  res.redirect(
+    `${SOCIAL_REDIRECT_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}&sid=${sid}`
+  );
+};

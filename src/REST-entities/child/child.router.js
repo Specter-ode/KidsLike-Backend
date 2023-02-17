@@ -1,9 +1,9 @@
 import { Router } from "express";
 import Joi from "joi";
-import validate from "../../helpers/validate.js";
-import { authorize } from "../../auth/auth.controller.js";
+import validate from "../../middlewares/validate.js";
+import { authenticate } from "../../middlewares/authenticate.js";
 import { addChild } from "./child.controller.js";
-import tryCatchWrapper from "../../helpers/try-catch-wrapper.js";
+import tryCatchWrapper from "../../helpers/tryCatchWrapper.js";
 
 const addChildSchema = Joi.object({
   name: Joi.string().required(),
@@ -14,7 +14,7 @@ const router = Router();
 
 router.post(
   "/",
-  tryCatchWrapper(authorize),
+  authenticate,
   validate(addChildSchema),
   tryCatchWrapper(addChild)
 );

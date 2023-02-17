@@ -31,6 +31,6 @@ const childSchema = new Schema(
   { versionKey: false }
 );
 
-// childSchema.post("save", handleSaveErrors);
+childSchema.post("save", handleSaveErrors);
 
 export default mongoose.model("Child", childSchema);

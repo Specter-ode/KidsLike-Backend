@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
-import { DateTime } from "luxon";
 import ChildModel from "../child/child.model.js";
 import TaskModel from "./task.model.js";
-import UserModel from "../user/user.model.js";
 import { weekPeriod } from "../../helpers/week.js";
+import cloudinary from "../../helpers/cloudinary.js";
 
 export const addTask = async (req, res) => {
   const parent = req.user;
@@ -21,21 +20,14 @@ export const addTask = async (req, res) => {
       .status(415)
       .json({ message: req.fileValidationError, success: false });
   }
-
-  let imageUrl;
-  if (!req.file) {
-    imageUrl =
-      "https://storage.googleapis.com/kidslikev2_bucket/default-task.jpg";
-  } else {
-    imageUrl = await uploadImage(req.file);
-  }
-
+  const image = await cloudinary.uploader.upload(req.file.path);
   const { days } = weekPeriod();
 
   const task = await TaskModel.create({
     ...req.body,
     childId: childToUpdateId,
-    imageUrl,
+    imageUrl: image.secure_url,
+    imageId: image.public_id,
     days,
   });
   await ChildModel.findByIdAndUpdate(childToUpdateId, {
@@ -113,10 +105,15 @@ export const deleteTask = async (req, res) => {
   if (!childToUpdate) {
     return res.status(404).json({ message: "Child not found" });
   }
+
   const deletedTask = await TaskModel.findByIdAndDelete(req.params.taskId);
   await ChildModel.findByIdAndUpdate(deletedTask.childId, {
     $pull: { tasks: mongoose.Types.ObjectId(deletedTask._id) },
   });
+
+  if (deletedTask.imageId) {
+    await cloudinary.uploader.destroy(deletedTask.imageId);
+  }
   return res.status(204).end();
 };
 

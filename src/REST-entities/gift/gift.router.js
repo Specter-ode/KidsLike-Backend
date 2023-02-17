@@ -1,9 +1,9 @@
 import { Router } from "express";
 import Joi from "joi";
 import mongoose from "mongoose";
-import validate from "../../helpers/validate.js";
-import { authorize } from "../../auth/auth.controller.js";
-import tryCatchWrapper from "../../helpers/try-catch-wrapper.js";
+import validate from "../../middlewares/validate.js";
+import { authenticate } from "../../middlewares/authenticate.js";
+import tryCatchWrapper from "../../helpers/tryCatchWrapper.js";
 import {
   addGift,
   editGift,
@@ -11,7 +11,7 @@ import {
   buyGift,
   getGifts,
 } from "./gift.controller.js";
-import { multerMid } from "../../helpers/multer-config.js";
+import { upload } from "../../middlewares/multer.js";
 
 const addGiftSchema = Joi.object({
   title: Joi.string().min(3).max(40).required(),
@@ -53,11 +53,11 @@ const editOrDeleteGiftIdSchema = Joi.object({
 
 const router = Router();
 
-router.get("/", authorize, tryCatchWrapper(getGifts));
+router.get("/", authenticate, tryCatchWrapper(getGifts));
 router.post(
   "/:childId",
-  tryCatchWrapper(authorize),
-  multerMid.single("file"),
+  authenticate,
+  upload.single("avatar"),
   validate(addGiftIdSchema, "params"),
   validate(addGiftSchema),
   tryCatchWrapper(addGift)
@@ -65,20 +65,20 @@ router.post(
 router
   .route("/:giftId")
   .patch(
-    tryCatchWrapper(authorize),
-    multerMid.single("file"),
+    authenticate,
+    upload.single("avatar"),
     validate(editOrDeleteGiftIdSchema, "params"),
     validate(editGiftSchema),
     tryCatchWrapper(editGift)
   )
   .delete(
-    tryCatchWrapper(authorize),
+    authenticate,
     validate(editOrDeleteGiftIdSchema, "params"),
     tryCatchWrapper(deleteGift)
   );
 router.patch(
   "/buy/:giftId",
-  tryCatchWrapper(authorize),
+  authenticate,
   validate(editOrDeleteGiftIdSchema, "params"),
   tryCatchWrapper(buyGift)
 );
