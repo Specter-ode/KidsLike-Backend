@@ -117,9 +117,9 @@ export const refreshTokens = async (req, res) => {
     );
 
     return res.status(200).json({
-      newAccessToken: accessToken,
-      newRefreshToken: refreshToken,
-      newSid: sid,
+      accessToken,
+      refreshToken,
+      sid,
     });
   }
   return res.status(400).json({ message: "No token provided" });
@@ -130,7 +130,10 @@ export const logout = async (req, res) => {
   await User.findByIdAndUpdate(_id, { accessToken: "", refreshToken: "" });
   const currentSession = req.session;
   await SessionModel.deleteOne({ _id: currentSession._id });
-  return res.status(204).end();
+  return res.status(204).json({
+    message: "Logout success",
+    userId: _id,
+  });
 };
 
 const { SOCIAL_REDIRECT_URL } = process.env;

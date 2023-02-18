@@ -58,7 +58,7 @@ export const addChild = async (req, res) => {
         name: data.name,
         gender: data.gender,
         id: data._id,
-        parentId: data.parentId,
+        // parentId: data.parentId,
       });
     });
 };

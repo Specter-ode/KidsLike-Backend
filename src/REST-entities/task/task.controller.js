@@ -45,6 +45,75 @@ export const addTask = async (req, res) => {
   });
 };
 
+export const editTask = async (req, res) => {
+  const parent = req.user;
+  const taskToEdit = await TaskModel.findById(req.params.taskId);
+  if (!taskToEdit) {
+    return res.status(404).json({ message: "Task not found" });
+  }
+  const childToUpdate = parent.children.find(
+    (childId) => childId.toString() === taskToEdit.childId.toString()
+  );
+  if (!childToUpdate) {
+    return res.status(404).json({ message: "Child not found" });
+  }
+  if (!req.file && !req.body.title && !req.body.reward) {
+    return res
+      .status(400)
+      .json({ message: "At least fields must be required" });
+  }
+  if (req.fileValidationError) {
+    return res.status(415).json({ message: req.fileValidationError });
+  }
+
+  if (taskToEdit.imageId) {
+    await cloudinary.uploader.destroy(taskToEdit.imageId);
+  }
+
+  const image = await cloudinary.uploader.upload(req.file.path);
+  const newTask = {
+    ...taskToEdit.toObject(),
+    ...req.body,
+    imageUrl: image.secure_url,
+    imageId: image.public_id,
+  };
+  await TaskModel.findByIdAndUpdate(req.params.taskId, newTask, {
+    overwrite: true,
+  });
+  return res.status(200).json({
+    title: newTask.title,
+    reward: newTask.reward,
+    imageUrl: newTask.imageUrl,
+    childId: newTask.childId,
+    id: newTask._id,
+    days: newTask.days,
+  });
+};
+
+export const deleteTask = async (req, res) => {
+  const parent = req.user;
+  const taskToDelete = await TaskModel.findById(req.params.taskId);
+  if (!taskToDelete) {
+    return res.status(404).json({ message: "Task not found" });
+  }
+  const childToUpdate = parent.children.find(
+    (childId) => childId.toString() === taskToDelete.childId.toString()
+  );
+  if (!childToUpdate) {
+    return res.status(404).json({ message: "Child not found" });
+  }
+
+  const deletedTask = await TaskModel.findByIdAndDelete(req.params.taskId);
+  if (deletedTask.imageId) {
+    await cloudinary.uploader.destroy(deletedTask.imageId);
+  }
+  await ChildModel.findByIdAndUpdate(deletedTask.childId, {
+    $pull: { tasks: mongoose.Types.ObjectId(deletedTask._id) },
+  });
+
+  return res.json({ taskId: deletedTask._id, childId: deletedTask.childId });
+};
+
 export const updateTaskActiveStatus = async (req, res) => {
   const { taskId } = req.params;
   const parent = req.user;
@@ -85,36 +154,13 @@ export const updateTaskActiveStatus = async (req, res) => {
     updatedTask: {
       title: taskToUpdate.title,
       reward: taskToUpdate.reward,
+      imageUrl: taskToUpdate.imageUrl,
       childId: taskToUpdate.childId,
       id: taskToUpdate._id,
       days: taskToUpdate.days,
     },
     rewardsPlanned: newRewardsPlanned,
   });
-};
-
-export const deleteTask = async (req, res) => {
-  const parent = req.user;
-  const taskToDelete = await TaskModel.findById(req.params.taskId);
-  if (!taskToDelete) {
-    return res.status(404).json({ message: "Task not found" });
-  }
-  const childToUpdate = parent.children.find(
-    (childId) => childId.toString() === taskToDelete.childId.toString()
-  );
-  if (!childToUpdate) {
-    return res.status(404).json({ message: "Child not found" });
-  }
-
-  const deletedTask = await TaskModel.findByIdAndDelete(req.params.taskId);
-  if (deletedTask.imageId) {
-    await cloudinary.uploader.destroy(deletedTask.imageId);
-  }
-  await ChildModel.findByIdAndUpdate(deletedTask.childId, {
-    $pull: { tasks: mongoose.Types.ObjectId(deletedTask._id) },
-  });
-
-  return res.status(204).end();
 };
 
 export const updateTaskCompletedStatus = async (req, res) => {
@@ -162,6 +208,7 @@ export const updateTaskCompletedStatus = async (req, res) => {
       title: taskToUpdate.title,
       reward: taskToUpdate.reward,
       imageUrl: taskToUpdate.imageUrl,
+      childId: taskToUpdate.childId,
       id: taskToUpdate._id,
       days: taskToUpdate.days,
     },

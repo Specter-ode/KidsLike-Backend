@@ -53,7 +53,7 @@ export const editGift = async (req, res) => {
   if (!req.file && !req.body.title && !req.body.price) {
     return res
       .status(400)
-      .json({ message: "At least one field must be required" });
+      .json({ message: "At least fields must be required" });
   }
   if (req.fileValidationError) {
     return res.status(415).json({ message: req.fileValidationError });
