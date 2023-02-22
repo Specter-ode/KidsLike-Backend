@@ -34,7 +34,7 @@ export const addGift = async (req, res) => {
     price: gift.price,
     imageUrl: gift.imageUrl,
     childId: gift.childId,
-    id: gift._id,
+    _id: gift._id,
   });
 };
 
@@ -79,7 +79,7 @@ export const editGift = async (req, res) => {
     isPurchased: newGift.isPurchased,
     imageUrl: newGift.imageUrl,
     childId: newGift.childId,
-    id: newGift._id,
+    _id: newGift._id,
   });
 };
 
@@ -141,7 +141,7 @@ export const buyGift = async (req, res) => {
         isPurchased: purchasedGift.isPurchased,
         imageUrl: purchasedGift.imageUrl,
         childId: purchasedGift.childId,
-        id: purchasedGift._id,
+        _id: purchasedGift._id,
       },
     });
   }

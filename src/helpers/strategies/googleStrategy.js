@@ -2,9 +2,7 @@ import { Strategy } from "passport-google-oauth2";
 import UserModel from "../../REST-entities/user/user.model.js";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
 
-dotenv.config();
 const {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,

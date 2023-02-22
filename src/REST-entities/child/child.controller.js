@@ -6,6 +6,7 @@ import ChildModel from "./child.model.js";
 
 export const addChild = async (req, res) => {
   const { name, gender } = req.body;
+  console.log("req.body: ", req.body);
   const { _id } = req.user;
 
   const existingChild = await ChildModel.findOne({
@@ -16,7 +17,7 @@ export const addChild = async (req, res) => {
 
   if (existingChild) {
     return res.status(409).json({
-      message: `${gender} with name ${name} and already exists`,
+      message: `${gender} with name ${name} already exists`,
     });
   }
   const newChild = await ChildModel.create({
@@ -50,14 +51,15 @@ export const addChild = async (req, res) => {
       }
 
       return res.status(201).json({
+        _id: data._id,
+        name: data.name,
+        gender: data.gender,
         balance: data.balance,
         rewardsGained: data.rewardsGained,
         rewardsPlanned: data.rewardsPlanned,
         tasks: data.tasks,
         gifts: data.gifts,
-        name: data.name,
-        gender: data.gender,
-        id: data._id,
+
         // parentId: data.parentId,
       });
     });

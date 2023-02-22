@@ -24,15 +24,10 @@ export const weekPeriod = () => {
 
 export const checkWeek = async (_id) => {
   const startOfTheWeek = DateTime.local().startOf("week");
-  console.log(
-    'startOfTheWeek.toFormat("yyyy-MM-dd"): ',
-    startOfTheWeek.toFormat("yyyy-MM-dd")
-  );
   const isCorrectWeek = await UserModel.findOne({
     _id,
     startWeekDate: startOfTheWeek.toFormat("yyyy-MM-dd"),
   });
-  console.log("isCorrectWeek: ", isCorrectWeek);
 
   if (!isCorrectWeek) {
     const days = [];

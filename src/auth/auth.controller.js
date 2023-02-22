@@ -11,8 +11,6 @@ import { createSidAndTokens } from "../helpers/createSidAndTokens.js";
 
 export const register = async (req, res) => {
   const { email, password, username } = req.body;
-  console.log("req.headers: ", req.headers);
-  console.log("req.headers.origin: ", req.headers.origin);
 
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) {
@@ -58,8 +56,10 @@ export const login = async (req, res, next) => {
   }
 
   const { accessToken, refreshToken, sid } = await createSidAndTokens(user._id);
+  console.log("refreshToken: ", refreshToken);
+  console.log("accessToken: ", accessToken);
   await checkWeek(user._id);
-  await UserModel.findByIdAndUpdate(user._id, {
+  const userToSend = await UserModel.findByIdAndUpdate(user._id, {
     accessToken,
     refreshToken,
   }).populate({
@@ -70,17 +70,18 @@ export const login = async (req, res, next) => {
       { path: "gifts", model: GiftModel },
     ],
   });
+  console.log("userToSend: ", userToSend);
 
   return res.json({
     accessToken,
     refreshToken,
     sid,
-    email: user.email,
-    username: user.username,
-    id: user._id,
-    startWeekDate: user.startWeekDate,
-    endWeekDate: user.endWeekDate,
-    children: user.children,
+    email: userToSend.email,
+    username: userToSend.username,
+    id: userToSend._id,
+    startWeekDate: userToSend.startWeekDate,
+    endWeekDate: userToSend.endWeekDate,
+    children: userToSend.children,
   });
 };
 
@@ -98,6 +99,7 @@ export const refreshTokens = async (req, res) => {
         reqRefreshToken,
         process.env.REFRESH_TOKEN_SECRET_KEY
       );
+      console.log("payload: ", payload);
     } catch (err) {
       await SessionModel.findByIdAndDelete(req.body.sid);
       return res.status(401).json({ message: "Unauthorized" });
@@ -126,8 +128,9 @@ export const refreshTokens = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
+  console.log("logout req.user: ", req.user);
   const { _id } = req.user;
-  await User.findByIdAndUpdate(_id, { accessToken: "", refreshToken: "" });
+  await UserModel.findByIdAndUpdate(_id, { accessToken: "", refreshToken: "" });
   const currentSession = req.session;
   await SessionModel.deleteOne({ _id: currentSession._id });
   return res.status(204).json({

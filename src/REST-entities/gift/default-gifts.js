@@ -15,7 +15,7 @@ export const ruGifts = [
     title: "Подарок",
     reward: 100,
     imageUrl:
-      "https://res.cloudinary.com/deobrs0yr/image/upload/v1676562653/flowers-mobile_nkaank.jpg",
+      "https://res.cloudinary.com/deobrs0yr/image/upload/v1676647566/gift_v8kmsv.jpg",
   },
   {
     title: "Пицца",
@@ -37,7 +37,7 @@ export const ruGifts = [
   },
   {
     title: "Поход на каток",
-    reward: 4,
+    reward: 90,
     imageUrl:
       "https://res.cloudinary.com/deobrs0yr/image/upload/v1676647566/skating-rink_kpjjgp.png",
   },
@@ -45,7 +45,7 @@ export const ruGifts = [
     title: "Желание",
     reward: 250,
     imageUrl:
-      "https://res.cloudinary.com/deobrs0yr/image/upload/v1676647566/gift_v8kmsv.jpg",
+      "https://res.cloudinary.com/deobrs0yr/image/upload/v1676647566/wish_nb5upa.png",
   },
 ];
 

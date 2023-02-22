@@ -3,9 +3,11 @@ import UserModel from "./user.model.js";
 import ChildModel from "../child/child.model.js";
 import TaskModel from "../task/task.model.js";
 import GiftModel from "../gift/gift.model.js";
-import { weekPeriod } from "../../helpers/week.js";
+import { checkWeek, weekPeriod } from "../../helpers/week.js";
 
 export const getAllInfo = async (req, res, next) => {
+  console.log("req.user: ", req.user);
+
   const email = req.user.email;
   await checkWeek(req.user._id);
 

@@ -1,4 +1,7 @@
 import jwt from "jsonwebtoken";
+import SessionModel from "../REST-entities/session/session.model.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const {
   ACCESS_TOKEN_SECRET_KEY,

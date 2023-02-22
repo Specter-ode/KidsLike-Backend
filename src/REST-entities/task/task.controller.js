@@ -40,7 +40,7 @@ export const addTask = async (req, res) => {
     reward: task.reward,
     imageUrl: task.imageUrl,
     childId: task.childId,
-    id: task._id,
+    _id: task._id,
     days: task.days,
   });
 };
@@ -85,7 +85,7 @@ export const editTask = async (req, res) => {
     reward: newTask.reward,
     imageUrl: newTask.imageUrl,
     childId: newTask.childId,
-    id: newTask._id,
+    _id: newTask._id,
     days: newTask.days,
   });
 };
@@ -156,7 +156,7 @@ export const updateTaskActiveStatus = async (req, res) => {
       reward: taskToUpdate.reward,
       imageUrl: taskToUpdate.imageUrl,
       childId: taskToUpdate.childId,
-      id: taskToUpdate._id,
+      _id: taskToUpdate._id,
       days: taskToUpdate.days,
     },
     rewardsPlanned: newRewardsPlanned,
@@ -209,7 +209,7 @@ export const updateTaskCompletedStatus = async (req, res) => {
       reward: taskToUpdate.reward,
       imageUrl: taskToUpdate.imageUrl,
       childId: taskToUpdate.childId,
-      id: taskToUpdate._id,
+      _id: taskToUpdate._id,
       days: taskToUpdate.days,
     },
   });
