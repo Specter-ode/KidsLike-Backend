@@ -2,6 +2,7 @@ import { Strategy } from "passport-google-oauth2";
 import UserModel from "../../REST-entities/user/user.model.js";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
+import { weekPeriod } from "../../helpers/week.js";
 
 const {
   GOOGLE_CLIENT_ID,
@@ -27,24 +28,25 @@ const googleCallback = async (
   done
 ) => {
   try {
-    console.log("googleCallback req: ", req);
-
     const { email, displayName } = profile;
     const user = await UserModel.findOne({ email });
     if (user) {
       return done(null, user);
     }
-    const hashPassword = await bcrypt.hash(uuidv4(), HASH_NUMBER);
+
+    const passwordHash = await bcrypt.hash(uuidv4(), Number(HASH_NUMBER));
     const { startWeekDate, endWeekDate } = weekPeriod();
+
     const newUser = await UserModel.create({
-      name: displayName.trim(),
+      username: displayName.trim(),
       email,
-      password: hashPassword,
-      originUrl: req.headers.origin,
+      passwordHash,
+      // originUrl: req.headers.origin,
       startWeekDate,
       endWeekDate,
       children: [],
     });
+
     done(null, newUser);
   } catch (err) {
     done(err, false);

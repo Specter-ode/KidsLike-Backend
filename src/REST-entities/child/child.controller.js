@@ -6,7 +6,7 @@ import ChildModel from "./child.model.js";
 
 export const addChild = async (req, res) => {
   const { name, gender } = req.body;
-  console.log("req.body: ", req.body);
+
   const { _id } = req.user;
 
   const existingChild = await ChildModel.findOne({
@@ -42,7 +42,7 @@ export const addChild = async (req, res) => {
     { new: true }
   )
     .populate([
-      { path: "tasks", model: TaskModel },
+      { path: "tasks", model: TaskModel, select: "-days._id" },
       { path: "gifts", model: GiftModel },
     ])
     .exec((err, data) => {
@@ -59,8 +59,6 @@ export const addChild = async (req, res) => {
         rewardsPlanned: data.rewardsPlanned,
         tasks: data.tasks,
         gifts: data.gifts,
-
-        // parentId: data.parentId,
       });
     });
 };

@@ -2,6 +2,7 @@ import { Strategy } from "passport-facebook";
 import UserModel from "../../REST-entities/user/user.model.js";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
+import { weekPeriod } from "../../helpers/week.js";
 
 const {
   FACEBOOK_CLIENT_ID,
@@ -29,7 +30,7 @@ const facebookCallback = async (accessToken, refreshToken, profile, done) => {
       return done(null, user);
     }
 
-    const hashPassword = await bcrypt.hash(uuidv4(), HASH_NUMBER);
+    const hashPassword = await bcrypt.hash(uuidv4(), Number(HASH_NUMBER));
     const { startWeekDate, endWeekDate } = weekPeriod();
     const newUser = await UserModel.create({
       name: displayName.trim(),

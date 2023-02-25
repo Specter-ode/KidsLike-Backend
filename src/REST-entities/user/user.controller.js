@@ -6,8 +6,6 @@ import GiftModel from "../gift/gift.model.js";
 import { checkWeek, weekPeriod } from "../../helpers/week.js";
 
 export const getAllInfo = async (req, res, next) => {
-  console.log("req.user: ", req.user);
-
   const email = req.user.email;
   await checkWeek(req.user._id);
 
@@ -17,14 +15,16 @@ export const getAllInfo = async (req, res, next) => {
       path: "children",
       model: ChildModel,
       populate: [
-        { path: "tasks", model: TaskModel },
+        { path: "tasks", model: TaskModel, select: "-days._id" },
         { path: "gifts", model: GiftModel },
       ],
     })
+    .select("-children.parentId")
     .exec((err, data) => {
       if (err) {
         next(err);
       }
+
       return res.status(200).json({
         email: data.email,
         username: data.username,

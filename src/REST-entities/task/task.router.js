@@ -6,6 +6,7 @@ import { authenticate } from "../../middlewares/authenticate.js";
 import {
   addTask,
   deleteTask,
+  editTask,
   updateTaskActiveStatus,
   updateTaskCompletedStatus,
 } from "./task.controller.js";
@@ -82,6 +83,13 @@ router.patch(
   authenticate,
   validate(editOrDeleteTaskIdSchema, "params"),
   tryCatchWrapper(updateTaskCompletedStatus)
+);
+
+router.patch(
+  "/:taskId/edit",
+  authenticate,
+  validate(editOrDeleteTaskIdSchema, "params"),
+  tryCatchWrapper(editTask)
 );
 router
   .route("/:taskId/")

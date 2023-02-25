@@ -6,21 +6,13 @@ export const authenticate = async (req, res, next) => {
   try {
     const { authorization = "" } = req.headers;
     const [bearer, token] = authorization.split(" ");
-    console.log("token: ", token);
-    console.log("bearer: ", bearer);
 
     if (bearer !== "Bearer") {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    console.log(
-      "process.env.ACCESS_TOKEN_SECRET_KEY: ",
-      process.env.ACCESS_TOKEN_SECRET_KEY
-    );
 
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
-    console.log("payload: ", payload);
     const user = await UserModel.findById(payload.uid);
-    console.log("user: ", user);
     if (!user || !user.accessToken || user.accessToken !== token) {
       return res.status(401).json({ message: "Invalid token" });
     }

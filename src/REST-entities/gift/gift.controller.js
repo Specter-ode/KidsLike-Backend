@@ -105,49 +105,57 @@ export const deleteGift = async (req, res) => {
   return res.status(204).end();
 };
 
-export const buyGift = async (req, res) => {
+export const buyGifts = async (req, res) => {
   const parent = req.user;
-  const giftToBuy = await GiftModel.findById(req.params.giftId);
-  if (!giftToBuy) {
-    return res.status(404).json({ message: "Gift not found" });
-  }
+  const { giftIds } = req.body;
   const childToUpdateId = parent.children.find(
-    (childId) => childId.toString() === giftToBuy.childId.toString()
+    (childId) => childId.toString() === req.params.childId
   );
   if (!childToUpdateId) {
     return res.status(404).json({ message: "Child not found" });
   }
   const childToUpdate = await ChildModel.findById(childToUpdateId);
-  if (giftToBuy.isPurchased) {
+
+  const gifts = await GiftModel.find({ _id: { $in: giftIds } });
+  let totalExpenses = 0;
+  gifts.forEach((gift) => (totalExpenses += gift.price));
+  console.log("totalExpenses: ", totalExpenses);
+  console.log("gifts: ", gifts);
+
+  if (childToUpdate.balance < totalExpenses) {
     return res
-      .status(403)
-      .json({ message: "This gift has already been purchased" });
+      .status(409)
+      .json({ message: "Not enough balance for gaining this gifts" });
   }
-  if (childToUpdate.balance >= giftToBuy.price) {
-    const updatedBalance = childToUpdate.balance - giftToBuy.price;
-    const purchasedGift = await GiftModel.findByIdAndUpdate(
-      giftToBuy._id,
-      { isPurchased: true },
-      { new: true }
-    );
-    await ChildModel.findByIdAndUpdate(childToUpdateId, {
-      balance: updatedBalance,
+  const updatedGifts = gifts.map(async (gift) => {
+    if (gift.isPurchased) {
+      return res.status(409).json({
+        message: `The gift ${gift._id} has already been purchased`,
+      });
+    } else {
+      gift.isPurchased = true;
+      return await gift.save();
+    }
+  });
+  await Promise.all(updatedGifts);
+  const updatedBalance = childToUpdate.balance - totalExpenses;
+  return ChildModel.findByIdAndUpdate(
+    { _id: childToUpdateId },
+    { balance: updatedBalance },
+    { new: true }
+  )
+    .populate([{ path: "gifts", model: GiftModel }])
+    .exec((err, data) => {
+      if (err) {
+        next(err);
+      }
+
+      return res.status(200).json({
+        childId: data._id,
+        balance: data.balance,
+        gifts: data.gifts,
+      });
     });
-    return res.status(200).json({
-      updatedBalance,
-      purchasedGift: {
-        title: purchasedGift.title,
-        price: purchasedGift.price,
-        isPurchased: purchasedGift.isPurchased,
-        imageUrl: purchasedGift.imageUrl,
-        childId: purchasedGift.childId,
-        _id: purchasedGift._id,
-      },
-    });
-  }
-  return res
-    .status(409)
-    .json({ message: "Not enough balance for gaining this gift" });
 };
 
 export const getGifts = async (req, res, next) => {

@@ -33,7 +33,6 @@ export const addTask = async (req, res) => {
   await ChildModel.findByIdAndUpdate(childToUpdateId, {
     $push: { tasks: task },
   });
-  // await currentChild.save();
 
   return res.status(201).json({
     title: task.title,
@@ -41,7 +40,7 @@ export const addTask = async (req, res) => {
     imageUrl: task.imageUrl,
     childId: task.childId,
     _id: task._id,
-    days: task.days,
+    days,
   });
 };
 
@@ -80,13 +79,19 @@ export const editTask = async (req, res) => {
   await TaskModel.findByIdAndUpdate(req.params.taskId, newTask, {
     overwrite: true,
   });
+  const daysToSend = newTask.days.map((day) => ({
+    date: day.date,
+    isActive: day.isActive,
+    isCompleted: day.isCompleted,
+  }));
+
   return res.status(200).json({
     title: newTask.title,
     reward: newTask.reward,
     imageUrl: newTask.imageUrl,
     childId: newTask.childId,
     _id: newTask._id,
-    days: newTask.days,
+    days: daysToSend,
   });
 };
 
@@ -149,7 +154,11 @@ export const updateTaskActiveStatus = async (req, res) => {
   await ChildModel.findByIdAndUpdate(taskBeforeUpdate.childId, {
     rewardsPlanned: newRewardsPlanned,
   });
-
+  const daysToSend = taskToUpdate.days.map((day) => ({
+    date: day.date,
+    isActive: day.isActive,
+    isCompleted: day.isCompleted,
+  }));
   return res.status(200).json({
     updatedTask: {
       title: taskToUpdate.title,
@@ -157,7 +166,7 @@ export const updateTaskActiveStatus = async (req, res) => {
       imageUrl: taskToUpdate.imageUrl,
       childId: taskToUpdate.childId,
       _id: taskToUpdate._id,
-      days: taskToUpdate.days,
+      days: daysToSend,
     },
     rewardsPlanned: newRewardsPlanned,
   });
@@ -199,6 +208,13 @@ export const updateTaskCompletedStatus = async (req, res) => {
   await taskToUpdate.save();
   await parent.save();
   await childToUpdate.save();
+
+  const daysToSend = taskToUpdate.days.map((day) => ({
+    date: day.date,
+    isActive: day.isActive,
+    isCompleted: day.isCompleted,
+  }));
+
   return res.status(200).json({
     message: "Task has been successfully change active status",
     success: true,
@@ -210,7 +226,7 @@ export const updateTaskCompletedStatus = async (req, res) => {
       imageUrl: taskToUpdate.imageUrl,
       childId: taskToUpdate.childId,
       _id: taskToUpdate._id,
-      days: taskToUpdate.days,
+      days: daysToSend,
     },
   });
 };

@@ -56,8 +56,6 @@ export const login = async (req, res, next) => {
   }
 
   const { accessToken, refreshToken, sid } = await createSidAndTokens(user._id);
-  console.log("refreshToken: ", refreshToken);
-  console.log("accessToken: ", accessToken);
   await checkWeek(user._id);
   const userToSend = await UserModel.findByIdAndUpdate(user._id, {
     accessToken,
@@ -70,7 +68,6 @@ export const login = async (req, res, next) => {
       { path: "gifts", model: GiftModel },
     ],
   });
-  console.log("userToSend: ", userToSend);
 
   return res.json({
     accessToken,
@@ -99,7 +96,7 @@ export const refreshTokens = async (req, res) => {
         reqRefreshToken,
         process.env.REFRESH_TOKEN_SECRET_KEY
       );
-      console.log("payload: ", payload);
+      console.log("RefreshToken payload: ", payload);
     } catch (err) {
       await SessionModel.findByIdAndDelete(req.body.sid);
       return res.status(401).json({ message: "Unauthorized" });
@@ -128,7 +125,6 @@ export const refreshTokens = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  console.log("logout req.user: ", req.user);
   const { _id } = req.user;
   await UserModel.findByIdAndUpdate(_id, { accessToken: "", refreshToken: "" });
   const currentSession = req.session;
@@ -157,13 +153,18 @@ export const facebookAuth = async (req, res) => {
 };
 
 export const googleAuth = async (req, res) => {
-  const { accessToken, refreshToken, sid } = await createTokens(req.user._id);
+  console.log("req.user: ", req.user);
+
+  const { accessToken, refreshToken, sid } = await createSidAndTokens(
+    req.user._id
+  );
   await checkWeek(req.user._id);
 
   await UserModel.findByIdAndUpdate(req.user._id, {
     accessToken,
     refreshToken,
   });
+
   res.redirect(
     `${SOCIAL_REDIRECT_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}&sid=${sid}`
   );
