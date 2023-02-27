@@ -6,6 +6,8 @@ import cloudinary from "../../helpers/cloudinary.js";
 
 export const addTask = async (req, res) => {
   const parent = req.user;
+  console.log("req.body: ", req.body);
+  console.log("req.body: ", typeof req.body.reward);
 
   const childToUpdateId = parent.children.find(
     (childId) => childId?.toString() === req.params.childId
@@ -56,6 +58,8 @@ export const editTask = async (req, res) => {
   if (!childToUpdate) {
     return res.status(404).json({ message: "Child not found" });
   }
+  console.log("req.body: ", req.body);
+
   if (!req.file && !req.body.title && !req.body.reward) {
     return res
       .status(400)

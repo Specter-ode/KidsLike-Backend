@@ -1,101 +1,42 @@
 import { Router } from "express";
-import Joi from "joi";
-import mongoose from "mongoose";
 import validate from "../../middlewares/validate.js";
 import { authenticate } from "../../middlewares/authenticate.js";
 import tryCatchWrapper from "../../helpers/tryCatchWrapper.js";
-import {
-  addGift,
-  editGift,
-  deleteGift,
-  buyGifts,
-  getGifts,
-} from "./gift.controller.js";
+import * as ctrl from "./gift.controller.js";
+import * as giftJoiSchemas from "./gift.schemas.js";
 import { upload } from "../../middlewares/multer.js";
-
-const addGiftSchema = Joi.object({
-  title: Joi.string().min(3).max(40).required(),
-  price: Joi.number().required().min(1).max(10000),
-});
-
-const editGiftSchema = Joi.object({
-  title: Joi.string().min(3).max(40),
-  price: Joi.number().min(1).max(10000),
-});
-
-const buyGiftsSchema = Joi.object({
-  giftIds: Joi.array().items(
-    Joi.string().custom((value, helpers) => {
-      const isValidObjectId = mongoose.Types.ObjectId.isValid(value);
-      if (!isValidObjectId) {
-        return helpers.message({
-          custom: "Invalid 'GiftId'. Must be a MongoDB ObjectId",
-        });
-      }
-      return value;
-    })
-  ),
-});
-
-const addOrBuyGiftIdSchema = Joi.object({
-  childId: Joi.string()
-    .custom((value, helpers) => {
-      const isValidObjectId = mongoose.Types.ObjectId.isValid(value);
-      if (!isValidObjectId) {
-        return helpers.message({
-          custom: "Invalid 'childId'. Must be a MongoDB ObjectId",
-        });
-      }
-      return value;
-    })
-    .required(),
-});
-
-const editOrDeleteGiftIdSchema = Joi.object({
-  giftId: Joi.string()
-    .custom((value, helpers) => {
-      const isValidObjectId = mongoose.Types.ObjectId.isValid(value);
-      if (!isValidObjectId) {
-        return helpers.message({
-          custom: "Invalid 'giftId'. Must be a MongoDB ObjectId",
-        });
-      }
-      return value;
-    })
-    .required(),
-});
 
 const router = Router();
 
-router.get("/", authenticate, tryCatchWrapper(getGifts));
+router.get("/", authenticate, tryCatchWrapper(ctrl.getGifts));
 router.post(
   "/:childId",
   authenticate,
   upload.single("avatar"),
-  validate(addOrBuyGiftIdSchema, "params"),
-  validate(addGiftSchema),
-  tryCatchWrapper(addGift)
+  validate(giftJoiSchemas.addOrBuyParamsSchema, "params"),
+  validate(giftJoiSchemas.addGiftSchema),
+  tryCatchWrapper(ctrl.addGift)
 );
 router
   .route("/:giftId")
-  .patch(
+  .put(
     authenticate,
     upload.single("avatar"),
-    validate(editOrDeleteGiftIdSchema, "params"),
-    validate(editGiftSchema),
-    tryCatchWrapper(editGift)
+    validate(giftJoiSchemas.editOrDeleteParamsSchema, "params"),
+    validate(giftJoiSchemas.editGiftSchema),
+    tryCatchWrapper(ctrl.editGift)
   )
   .delete(
     authenticate,
-    validate(editOrDeleteGiftIdSchema, "params"),
-    tryCatchWrapper(deleteGift)
+    validate(giftJoiSchemas.editOrDeleteParamsSchema, "params"),
+    tryCatchWrapper(ctrl.deleteGift)
   );
 router.patch(
   "/buy/:childId",
   authenticate,
-  validate(addOrBuyGiftIdSchema, "params"),
-  validate(buyGiftsSchema),
-  tryCatchWrapper(buyGifts)
+  validate(giftJoiSchemas.addOrBuyParamsSchema, "params"),
+  validate(giftJoiSchemas.buyGiftsSchema),
+  tryCatchWrapper(ctrl.buyGifts)
 );
 
 export default router;
