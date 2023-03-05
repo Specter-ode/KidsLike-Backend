@@ -3,7 +3,8 @@ import UserModel from "../../REST-entities/user/user.model.js";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import { weekPeriod } from "../../helpers/week.js";
-
+import * as dotenv from "dotenv";
+dotenv.config();
 const {
   FACEBOOK_CLIENT_ID,
   FACEBOOK_SECRET_KEY,
