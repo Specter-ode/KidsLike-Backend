@@ -8,11 +8,11 @@ export const getDefaultTasksAndGifts = async (lang, childId) => {
   let defaultTasks = [];
   let defaultGifts = [];
 
-  if (lang === "ru") {
+  if (lang === "ru-RU") {
     defaultTasks = [...ruTasks];
     defaultGifts = [...ruGifts];
   }
-  if (lang === "ua") {
+  if (lang === "uk-UA") {
     defaultTasks = [...uaTasks];
     defaultGifts = [...uaGifts];
   }

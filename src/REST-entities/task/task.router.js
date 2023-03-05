@@ -32,16 +32,15 @@ router.patch(
   tryCatchWrapper(ctrl.updateTaskCompletedStatus)
 );
 
-router.put(
-  "/:taskId/edit",
-  authenticate,
-  upload.single("avatar"),
-  validate(taskJoiSchemas.editOrDeleteTaskSchema, "params"),
-  validate(taskJoiSchemas.addTaskSchema),
-  tryCatchWrapper(ctrl.editTask)
-);
 router
-  .route("/:taskId/")
+  .route("/:taskId")
+  .put(
+    authenticate,
+    upload.single("avatar"),
+    validate(taskJoiSchemas.editOrDeleteTaskSchema, "params"),
+    validate(taskJoiSchemas.addTaskSchema),
+    tryCatchWrapper(ctrl.editTask)
+  )
   .delete(
     authenticate,
     validate(taskJoiSchemas.editOrDeleteTaskSchema, "params"),

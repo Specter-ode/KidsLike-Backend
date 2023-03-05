@@ -34,6 +34,7 @@ export const addGift = async (req, res) => {
     price: gift.price,
     imageUrl: gift.imageUrl,
     childId: gift.childId,
+    isPurchased: gift.isPurchased,
     _id: gift._id,
   });
 };
@@ -47,6 +48,7 @@ export const editGift = async (req, res) => {
   const childToUpdate = parent.children.find(
     (childId) => childId.toString() === giftToEdit.childId.toString()
   );
+
   if (!childToUpdate) {
     return res.status(404).json({ message: "Child not found" });
   }
@@ -75,7 +77,7 @@ export const editGift = async (req, res) => {
   });
   return res.status(200).json({
     title: newGift.title,
-    price: newGift.price,
+    price: Number(newGift.price),
     isPurchased: newGift.isPurchased,
     imageUrl: newGift.imageUrl,
     childId: newGift.childId,
@@ -119,8 +121,6 @@ export const buyGifts = async (req, res) => {
   const gifts = await GiftModel.find({ _id: { $in: giftIds } });
   let totalExpenses = 0;
   gifts.forEach((gift) => (totalExpenses += gift.price));
-  console.log("totalExpenses: ", totalExpenses);
-  console.log("gifts: ", gifts);
 
   if (childToUpdate.balance < totalExpenses) {
     return res

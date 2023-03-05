@@ -6,9 +6,6 @@ import cloudinary from "../../helpers/cloudinary.js";
 
 export const addTask = async (req, res) => {
   const parent = req.user;
-  console.log("req.body: ", req.body);
-  console.log("req.body: ", typeof req.body.reward);
-
   const childToUpdateId = parent.children.find(
     (childId) => childId?.toString() === req.params.childId
   );
@@ -58,7 +55,6 @@ export const editTask = async (req, res) => {
   if (!childToUpdate) {
     return res.status(404).json({ message: "Child not found" });
   }
-  console.log("req.body: ", req.body);
 
   if (!req.file && !req.body.title && !req.body.reward) {
     return res
@@ -88,6 +84,7 @@ export const editTask = async (req, res) => {
     isActive: day.isActive,
     isCompleted: day.isCompleted,
   }));
+  console.log("daysToSend: ", daysToSend);
 
   return res.status(200).json({
     title: newTask.title,
@@ -120,7 +117,7 @@ export const deleteTask = async (req, res) => {
     $pull: { tasks: mongoose.Types.ObjectId(deletedTask._id) },
   });
 
-  return res.json({ taskId: deletedTask._id, childId: deletedTask.childId });
+  return res.status(204).end();
 };
 
 export const updateTaskActiveStatus = async (req, res) => {
@@ -166,7 +163,7 @@ export const updateTaskActiveStatus = async (req, res) => {
   return res.status(200).json({
     updatedTask: {
       title: taskToUpdate.title,
-      reward: taskToUpdate.reward,
+      reward: Number(taskToUpdate.reward),
       imageUrl: taskToUpdate.imageUrl,
       childId: taskToUpdate.childId,
       _id: taskToUpdate._id,

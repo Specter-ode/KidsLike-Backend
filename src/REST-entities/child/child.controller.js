@@ -5,7 +5,7 @@ import UserModel from "../user/user.model.js";
 import ChildModel from "./child.model.js";
 
 export const addChild = async (req, res) => {
-  const { name, gender } = req.body;
+  const { name, gender,lang } = req.body;
 
   const { _id } = req.user;
 
@@ -35,7 +35,7 @@ export const addChild = async (req, res) => {
     $push: { children: newChild },
   });
 
-  const { tasks, gifts } = await getDefaultTasksAndGifts("ru", newChild._id);
+  const { tasks, gifts } = await getDefaultTasksAndGifts(lang, newChild._id);
   return ChildModel.findByIdAndUpdate(
     { _id: newChild._id },
     { tasks, gifts },

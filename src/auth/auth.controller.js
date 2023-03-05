@@ -96,7 +96,6 @@ export const refreshTokens = async (req, res) => {
         reqRefreshToken,
         process.env.REFRESH_TOKEN_SECRET_KEY
       );
-      console.log("RefreshToken payload: ", payload);
     } catch (err) {
       await SessionModel.findByIdAndDelete(req.body.sid);
       return res.status(401).json({ message: "Unauthorized" });
@@ -114,7 +113,10 @@ export const refreshTokens = async (req, res) => {
     const { accessToken, refreshToken, sid } = await createSidAndTokens(
       user._id
     );
-
+    await UserModel.findByIdAndUpdate(user._id, {
+      accessToken,
+      refreshToken,
+    });
     return res.status(200).json({
       accessToken,
       refreshToken,
@@ -129,10 +131,7 @@ export const logout = async (req, res) => {
   await UserModel.findByIdAndUpdate(_id, { accessToken: "", refreshToken: "" });
   const currentSession = req.session;
   await SessionModel.deleteOne({ _id: currentSession._id });
-  return res.status(204).json({
-    message: "Logout success",
-    userId: _id,
-  });
+  return res.status(204).end();
 };
 
 const { SOCIAL_REDIRECT_URL } = process.env;

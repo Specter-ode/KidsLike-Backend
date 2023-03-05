@@ -8,7 +8,7 @@ export const authenticate = async (req, res, next) => {
     const [bearer, token] = authorization.split(" ");
 
     if (bearer !== "Bearer") {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Invalid token" });
     }
 
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
@@ -27,7 +27,7 @@ export const authenticate = async (req, res, next) => {
   } catch (error) {
     if (!error.status) {
       error.status = 401;
-      error.message = "Unauthorized | No token provided";
+      error.message = "Unauthorized | Invalid token";
     }
     next(error);
   }
