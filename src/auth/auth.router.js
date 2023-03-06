@@ -5,12 +5,12 @@ import tryCatchWrapper from "../helpers/tryCatchWrapper.js";
 import {
   register,
   login,
-  // googleAuth,
-  // facebookAuth,
+  googleAuth,
+  facebookAuth,
   refreshTokens,
   logout,
 } from "./auth.controller.js";
-// import authSocial from "../middlewares/authSocial.js";
+import authSocial from "../middlewares/authSocial.js";
 import validate from "../middlewares/validate.js";
 import { authenticate } from "../middlewares/authenticate.js";
 
@@ -50,25 +50,25 @@ router.post(
   tryCatchWrapper(refreshTokens)
 );
 
-// router.get(
-//   "/google",
-//   authSocial.authenticate("google", { scope: ["email", "profile"] })
-// );
+router.get(
+  "/google",
+  authSocial.authenticate("google", { scope: ["email", "profile"] })
+);
 
-// router.get(
-//   "/google/callback",
-//   authSocial.authenticate("google", { session: false }),
-//   tryCatchWrapper(googleAuth)
-// );
+router.get(
+  "/google/callback",
+  authSocial.authenticate("google", { session: false }),
+  tryCatchWrapper(googleAuth)
+);
 
-// router.get(
-//   "/facebook",
-//   authSocial.authenticate("facebook", { scope: ["email", "public_profile"] })
-// );
-// router.get(
-//   "/facebook/callback",
-//   authSocial.authenticate("facebook", { session: false }),
-//   tryCatchWrapper(facebookAuth)
-// );
+router.get(
+  "/facebook",
+  authSocial.authenticate("facebook", { scope: ["email", "public_profile"] })
+);
+router.get(
+  "/facebook/callback",
+  authSocial.authenticate("facebook", { session: false }),
+  tryCatchWrapper(facebookAuth)
+);
 
 export default router;
