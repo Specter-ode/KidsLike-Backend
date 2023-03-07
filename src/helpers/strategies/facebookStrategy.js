@@ -14,6 +14,7 @@ const {
 } = process.env;
 
 const callbackURL = `${APP_URL}${FACEBOOK_CALLBACK_URL}`;
+console.log("FACEBOOK callbackURL: ", callbackURL);
 
 const facebookParams = {
   clientID: FACEBOOK_CLIENT_ID,
@@ -21,6 +22,7 @@ const facebookParams = {
   callbackURL,
   profileFields: ["id", "displayName", "email", "photos"],
 };
+console.log("facebookParams: ", facebookParams);
 
 const facebookCallback = async (accessToken, refreshToken, profile, done) => {
   try {
