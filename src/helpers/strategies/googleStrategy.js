@@ -14,13 +14,12 @@ const {
 } = process.env;
 
 const callbackURL = `${APP_URL}${GOOGLE_CALLBACK_URL}`;
-console.log("GOOGLE callbackURL: ", callbackURL);
+
 const googleParams = {
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
   callbackURL,
 };
-console.log("GOOGLE googleParams: ", googleParams);
 
 const googleCallback = async (
   req,

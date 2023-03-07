@@ -84,7 +84,6 @@ export const editTask = async (req, res) => {
     isActive: day.isActive,
     isCompleted: day.isCompleted,
   }));
-  console.log("daysToSend: ", daysToSend);
 
   return res.status(200).json({
     title: newTask.title,

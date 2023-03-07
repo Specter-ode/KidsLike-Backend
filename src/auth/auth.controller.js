@@ -64,7 +64,7 @@ export const login = async (req, res, next) => {
     path: "children",
     model: ChildModel,
     populate: [
-      { path: "tasks", model: TaskModel },
+      { path: "tasks", model: TaskModel, select: "-days._id" },
       { path: "gifts", model: GiftModel },
     ],
   });
@@ -152,8 +152,6 @@ export const facebookAuth = async (req, res) => {
 };
 
 export const googleAuth = async (req, res) => {
-  console.log("req.user: ", req.user);
-
   const { accessToken, refreshToken, sid } = await createSidAndTokens(
     req.user._id
   );
