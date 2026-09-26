@@ -9,6 +9,7 @@ import childRouter from "./REST-entities/child/child.router.js";
 import taskRouter from "./REST-entities/task/task.router.js";
 import giftRouter from "./REST-entities/gift/gift.router.js";
 import userRouter from "./REST-entities/user/user.router.js";
+import noteRouter from "./REST-entities/note/note.router.js";
 // const swaggerDocument = require("../../swagger.json");
 
 const app = express();
@@ -23,6 +24,7 @@ app.use("/child", childRouter);
 app.use("/task", taskRouter);
 app.use("/gift", giftRouter);
 app.use("/user", userRouter);
+app.use("/note", noteRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });

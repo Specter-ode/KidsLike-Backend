@@ -3,6 +3,7 @@ import UserModel from "./user.model.js";
 import ChildModel from "../child/child.model.js";
 import TaskModel from "../task/task.model.js";
 import GiftModel from "../gift/gift.model.js";
+import NoteModel from "../note/note.model.js";
 import { checkWeek, weekPeriod } from "../../helpers/week.js";
 
 export const getAllInfo = async (req, res, next) => {
@@ -75,6 +76,7 @@ export const clearAllInfo = async (req, res, next) => {
         await ChildModel.deleteOne({ _id: child._id });
       });
     });
+  await NoteModel.deleteMany({ parentId: user._id });
   await UserModel.deleteOne({ email });
   return res.status(204).end();
 };
